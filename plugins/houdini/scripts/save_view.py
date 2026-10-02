@@ -13,10 +13,10 @@ class SaveWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Cortex | Save Incremental Version")
-        self.setWindowFlags(Qt.Tool) # پنجره شناور
+        self.setWindowFlags(Qt.Tool) # Floating window
         self.resize(400, 430)
         
-        # استایل پیش‌فرض (اگر فایل style.py در دسترس نبود ارور ندهد)
+        # Default style (no error if style.py is missing)
         self.setStyleSheet("""
             QDialog { background-color: #2b2b2b; color: #eee; }
             QLabel { color: #ccc; }
@@ -25,12 +25,12 @@ class SaveWindow(QDialog):
             QPushButton:hover { background-color: #005a9e; }
         """)
 
-        # دریافت اطلاعات پروژه از متغیرهای محیطی
+        # Project info from environment variables
         self.work_path = os.environ.get("CORTEX_WORK_PATH", "")
         self.task_filename = os.environ.get("CORTEX_TASK_NAME", "Houdini_Task")
         self.next_version = 1
         
-        # مسیر موقت برای ذخیره عکس پریویو
+        # Temp path for the preview image
         self.temp_thumb = os.path.join(os.environ.get("TEMP", "C:/temp"), "ctx_houdini_thumb.jpg").replace("\\", "/")
         
         self.init_ui()
@@ -41,7 +41,7 @@ class SaveWindow(QDialog):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
 
-        # 1. نمایش تامنیل (Preview)
+        # 1. Thumbnail (Preview)
         self.lbl_thumbnail = QLabel("Capturing Viewport...")
         self.lbl_thumbnail.setAlignment(Qt.AlignCenter)
         self.lbl_thumbnail.setMinimumHeight(220)
@@ -49,7 +49,7 @@ class SaveWindow(QDialog):
         self.lbl_thumbnail.setScaledContents(True) 
         layout.addWidget(self.lbl_thumbnail)
 
-        # 2. اطلاعات ورژن
+        # 2. Version info
         info_layout = QHBoxLayout()
         info_layout.addWidget(QLabel("Next Version:"))
         
@@ -59,14 +59,14 @@ class SaveWindow(QDialog):
         info_layout.addStretch()
         layout.addLayout(info_layout)
 
-        # 3. کامنت
+        # 3. Comment
         layout.addWidget(QLabel("Comment / Description:"))
         self.txt_comment = QTextEdit()
         self.txt_comment.setPlaceholderText("What did you change in this version?")
         self.txt_comment.setMaximumHeight(80)
         layout.addWidget(self.txt_comment)
 
-        # 4. دکمه ذخیره
+        # 4. Save button
         self.btn_save = QPushButton("💾 SAVE SCENE + PREVIEW")
         self.btn_save.setFixedHeight(45)
         self.btn_save.clicked.connect(self.do_save)
@@ -94,7 +94,7 @@ class SaveWindow(QDialog):
         self.lbl_version.setText(f"v{self.next_version:03d}")
 
     def capture_thumbnail(self):
-        """گرفتن عکس از ویوپورت هودینی (Flipbook)"""
+        """Flipbook the Houdini viewport"""
         try:
             desktop = hou.ui.curDesktop()
             scene_viewer = desktop.paneTabOfType(hou.paneTabType.SceneViewer)
@@ -102,17 +102,17 @@ class SaveWindow(QDialog):
                 viewport = scene_viewer.curViewport()
                 settings = scene_viewer.flipbookSettings().stash()
                 
-                # تنظیم روی تک فریم فعلی
+                # Current single frame
                 current_frame = hou.intFrame()
                 settings.frameRange((current_frame, current_frame))
                 settings.output(self.temp_thumb)
-                settings.resolution((640, 360)) # رزولوشن سبک برای UI
+                settings.resolution((640, 360)) # Light resolution for the UI
                 settings.useResolution(True)
                 
-                # اجرای فلیپ‌بوک
+                # Run the flipbook
                 scene_viewer.flipbook(viewport, settings)
                 
-                # لود کردن عکس در رابط کاربری
+                # Load the image in the UI
                 if os.path.exists(self.temp_thumb):
                     pixmap = QPixmap(self.temp_thumb)
                     self.lbl_thumbnail.setPixmap(pixmap)
@@ -127,21 +127,21 @@ class SaveWindow(QDialog):
         if not os.path.exists(self.work_path):
             os.makedirs(self.work_path)
 
-        # ساخت نام فایل‌ها
+        # Build filenames
         base_name = f"{self.task_filename}_v{self.next_version:03d}"
         hip_file = os.path.join(self.work_path, f"{base_name}.hip").replace("\\", "/")
         jpg_file = os.path.join(self.work_path, f"{base_name}.jpg").replace("\\", "/")
         txt_file = os.path.join(self.work_path, f"{base_name}.txt").replace("\\", "/")
 
         try:
-            # ۱. ذخیره فایل هودینی
+            # 1. Save the Houdini file
             hou.hipFile.save(hip_file)
             
-            # ۲. کپی کردن عکس پریویو
+            # 2. Copy the preview image
             if os.path.exists(self.temp_thumb):
                 shutil.copy2(self.temp_thumb, jpg_file)
             
-            # ۳. ذخیره کامنت
+            # 3. Save the comment
             comment = self.txt_comment.toPlainText()
             if comment.strip():
                 with open(txt_file, "w", encoding="utf-8") as f:
@@ -155,8 +155,8 @@ class SaveWindow(QDialog):
             QMessageBox.critical(self, "Error", f"Save Failed:\n{e}")
 
 def run():
-    """اجرای دیالوگ و چسباندن آن به پنجره اصلی هودینی"""
-    # گرفتن پنجره اصلی هودینی تا UI ما روی هوا معلق نماند
+    """Run the dialog parented to the main Houdini window"""
+    # Use the main Houdini window so the UI is not floating unparented
     parent = hou.qt.mainWindow()
     win = SaveWindow(parent)
     win.show()

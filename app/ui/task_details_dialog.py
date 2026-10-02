@@ -15,8 +15,8 @@ class TaskDetailsDialog(QDialog):
         
         
         
-        # --- اصلاح مهم: مپ کردن صحیح ایندکس‌های دیتابیس ---
-        # ساختار دیتایی که از get_task_by_id میاد:
+        # --- Important fix: correct mapping of database indexes ---
+        # The data structure that comes from get_task_by_id:
         # 0: id, 1: status, 2: dept_name, 3: username, 4: color, 
         # 5: title, 6: description, 7: entity_id, 8: dept_id, 9: assignee_id
         
@@ -29,7 +29,7 @@ class TaskDetailsDialog(QDialog):
             self.title = task_data[5]
             self.description = task_data[6]
         except IndexError:
-            # اگر به هر دلیلی دیتا کمتر بود (برای سازگاری با کدهای قدیمی)
+            # If for any reason the data was less (to be compatible with old codes)
             self.title = "Error loading data"
             self.description = str(task_data)
             self.status = "Unknown"
@@ -50,14 +50,14 @@ class TaskDetailsDialog(QDialog):
         # 1. Header (Dept Color + Title)
         header_layout = QHBoxLayout()
         
-        # رنگ دپارتمان
+        # Department color
         if self.dept_color:
             color_box = QLabel()
             color_box.setFixedSize(16, 16)
             color_box.setStyleSheet(f"background-color: {self.dept_color}; border-radius: 8px;")
             header_layout.addWidget(color_box)
 
-        # تایتل تسک
+        # Task title
         lbl_title = QLabel(self.title)
         lbl_title.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
         header_layout.addWidget(lbl_title)
@@ -78,7 +78,7 @@ class TaskDetailsDialog(QDialog):
         
         layout.addLayout(info_layout)
         
-        # خط جداکننده
+        # dividing line
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)

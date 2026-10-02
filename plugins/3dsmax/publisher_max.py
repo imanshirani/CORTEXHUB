@@ -17,7 +17,7 @@ except Exception as e:
 
 from app.core.database import DatabaseManager
 from app.ui.publish_dialog import PublishDialog
-import style  # ایمپورت استایل لوکال (از plugins/3dsmax/style.py)
+import style  # Local style (plugins/3dsmax/style.py)
 
 rt = pymxs.runtime
 
@@ -55,15 +55,15 @@ class MaxPublisher:
         except:
             parent = None
 
-        # --- بخش جدید: تشخیص دپارتمان و ساخت لیست آپشن‌ها ---
+        # --- Detect department and build the option list ---
         task_data = self.db.get_task_by_id(self.task_id)
         dept_name = task_data[2].lower() if task_data else "general"
         
-        # فراخوانی متد get_max_options که در کلاس داری
+        # Call get_max_options on the class
         max_opts = self.get_max_options(dept_name)
         # ---------------------------------------------------
             
-        # --- STEP 1: گرفتن عکس برای نمایش در UI ---
+        # --- STEP 1: grab a still for the UI ---
         temp_thumb = os.path.join(os.environ["TEMP"], "cortex_pub_preview.jpg")
         try:
             bmp = rt.gw.getViewportDib()
@@ -72,16 +72,16 @@ class MaxPublisher:
         except:
             temp_thumb = None
 
-        # ساخت دیالوگ
+        # Build the dialog
         self.dialog = PublishDialog(
             session, 
             self.task_id, 
             parent=parent, 
             thumbnail_path=temp_thumb,
-            output_config=max_opts  # <--- اتصال لیست به دیالوگ
+            output_config=max_opts  # <--- wire the list into the dialog
         )
         
-        # اعمال استایل
+        # Apply style
         self.dialog.setStyleSheet(style.PUBLISH_DIALOG)
         
         
@@ -89,7 +89,7 @@ class MaxPublisher:
         if self.dialog.exec():
             data = self.dialog.get_data()
             
-            # ادامه ماجرا (Validation و ...)
+            # Continue (validation, ...)
             print(">> [Cortex] Running Validations...")
             if self.validate(data) is False:
                 print(">> [Cortex] PUBLISH STOPPED: Validation failed.")
@@ -97,7 +97,7 @@ class MaxPublisher:
             
             self.run_publish_process(data)
             
-            # اگر لوک‌دِو بود و تیک متریال را زده بود
+            # If lookdev and the material checkbox is on
             if 'native_lib' in data['outputs'] or 'mat_lib' in data['outputs']:
                 self.export_lookdev_assets()
 
@@ -121,12 +121,12 @@ class MaxPublisher:
         return options
     
     def get_publish_root(self):
-        """یافتن ریشه اصلی اَسِت برای دسترسی به فولدر 3d و publish"""
+        """Find the asset root so we can reach the 3d and publish folders"""
         if not self.work_path: return ""
         
         parts = self.work_path.replace("\\", "/").split("/")
         try:
-            # پیدا کردن ایندکس پوشه Work برای بازگشت به ریشه اَسِت
+            # Find the Work folder index to walk back to the asset root
             work_idx = -1
             for i, p in enumerate(parts):
                 if p.lower() == "work":
@@ -134,7 +134,7 @@ class MaxPublisher:
                     break
             
             if work_idx != -1:
-                # مسیر تا ریشه اَسِت (مثلاً .../Assets/Characters/Hero)
+                # Path to the asset root (e.g. .../Assets/Characters/Hero)
                 return "/".join(parts[:work_idx])
         except:
             pass
@@ -153,13 +153,13 @@ class MaxPublisher:
             QMessageBox.warning(None, "Error", "Please save the file first.")
             return
 
-        # ۱. گرفتن مسیر اصلی از دیتابیس
+        # 1. Read the main path from the database
         dest_3d = self.db.get_publish_path(self.task_id, software=self.software, category="3d")
         if not dest_3d:
             QMessageBox.critical(None, "Error", "Could not resolve publish path from database.")
             return
 
-        # --- بخش جدید: استخراج نام تسک و ساخت زیرپوشه‌ها ---
+        # --- Extract the task name and build subfolders ---
         task_name = os.environ.get("CORTEX_TASK_NAME", "out").replace(" ", "_")
         
         dest_3d = os.path.join(dest_3d, task_name).replace("\\", "/")
@@ -174,7 +174,7 @@ class MaxPublisher:
         base_render = self.db.get_publish_path(self.task_id, software="previews", category="renders")
         dest_render = os.path.join(base_render, f"v{version_num:03d}").replace("\\", "/") if base_render else ""
 
-        # ساخت پوشه مکس در صورت عدم وجود
+        # Create the max folder if missing
         if not os.path.exists(dest_3d): 
             os.makedirs(dest_3d)
         if dest_obj and not os.path.exists(dest_obj): 
@@ -182,7 +182,7 @@ class MaxPublisher:
         if dest_abc and not os.path.exists(dest_abc): 
             os.makedirs(dest_abc)
 
-        # استخراج نام اَسِت (مثلاً Hero) از مسیر تولید شده
+        # Asset name (e.g. Hero) from the generated path
         publish_root = os.path.dirname(os.path.dirname(os.path.dirname(dest_3d)))
         asset_name = os.path.basename(publish_root)
 
@@ -284,7 +284,7 @@ class MaxPublisher:
             print(f"!! Publish Error: {e}")
 
     def version_up_work_file(self, current_path):
-        """ساخت ورژن جدید در Work Area به همراه اسکرین‌شات"""
+        """Create a new version in the work area plus a screenshot"""
         try:
             folder = os.path.dirname(current_path)
             filename = os.path.basename(current_path)
@@ -301,10 +301,10 @@ class MaxPublisher:
                     new_filename = f"{base}_v{new_ver:03d}.{ext}"
                     new_path = os.path.join(folder, new_filename)
                     
-                    # ۱. ذخیره فایل مکس جدید
+                    # 1. Save the new Max file
                     rt.saveMaxFile(new_path)
                     
-                    # ۲. گرفتن و ذخیره تامنیل برای ورژن جدید
+                    # 2. Capture and store a thumbnail for the new version
                     new_thumb_path = new_path.replace(".max", ".jpg")
                     try:
                         bmp = rt.gw.getViewportDib()
@@ -325,12 +325,12 @@ class MaxPublisher:
         """
         self.errors = []
         self.warnings = []
-        # ۱. ابتدا انتخاب را چک کن
+        # 1. Check the selection first
         #self._validate_max_selection(is_mandatory=True)
         
-        # ۲. تعریف لیست گلوبال در مکس‌اسکریپت
+        # 2. Define a global list in MaxScript
         rt.execute("global cortex_errors = #()")
-        rt.execute("cortex_errors = #()") # ریست کردن لیست برای هر بار ولیدیشن
+        rt.execute("cortex_errors = #()") # Reset the list for each validation pass
         
         project_id = os.environ.get("CORTEX_PROJECT_ID")
         rules = self.db.get_validation_rules_with_scripts(project_id, self.software)
@@ -340,21 +340,21 @@ class MaxPublisher:
             if not script_content: continue
 
             try:
-                # اگر کد پایتون است
+                # If the rule is Python
                 if script_content.strip().startswith(("import", "from")) or "pymxs" in script_content:
                     exec(script_content, {"rt": rt, "errors": self.errors, "pymxs": pymxs, "os": os})
                 else:
-                    # اگر مکس‌اسکریپت است
+                    # If the rule is MaxScript
                     rt.execute(script_content)
             except Exception as e:
                 self.errors.append(f"❌ Script Error in {rule.get('rule_key')}: {e}")
 
-        # ۳. انتقال ارورهای مکس‌اسکریپت به لیست پایتون
+        # 3. Copy MaxScript errors into the Python list
         mx_errors = list(rt.cortex_errors)
         if mx_errors:
             self.errors.extend([str(err) for err in mx_errors])
 
-        # ۴. حالا خروجی نهایی ترمز را فعال می‌کند
+        # 4. The final output can now stop the publish
         return self._show_validation_results()
     
     
@@ -363,7 +363,7 @@ class MaxPublisher:
         """
         Handle  Show Validation Results operation.
         """
-        # حالا که self.warnings را در بالا تعریف کردی، اینجا دیگر ارور نمی‌دهد
+        # self.warnings is defined above, so this no longer errors
         if self.errors:
             QMessageBox.critical(None, "Validation Failed", "\n".join(self.errors))
             return False
@@ -375,7 +375,7 @@ class MaxPublisher:
         return True
     
     def _validate_max_selection(self, is_mandatory):
-        """چک کردن اینکه چیزی در مکس انتخاب شده باشد"""
+        """Check that something is selected in Max"""
         import pymxs
         if len(pymxs.runtime.selection) == 0:
             msg = "❌ Selection: Nothing is selected in Max!"
@@ -386,23 +386,23 @@ class MaxPublisher:
         """
         Handle Run Lookdev Publish operation.
         """
-        # ۱. ولیدیشن: مطمئن شو که آرتیست فقط از متریال OpenPBR استفاده کرده است
+        # 1. Validation: artist must use only OpenPBR materials
         for mat in rt.getSceneMaterials():
             if "OpenPBR" not in str(type(mat)):
                 self.errors.append(f"❌ Material Error: {mat.name} is not an OpenPBR material!")
         
         if not self._show_validation_results(): return
 
-        # ۲. اکسپورت شیدرها به صورت مستقل
-        # در مکس 2026، OpenPBR به خوبی با MaterialX یکپارچه شده است
+        # 2. Export shaders on their own
+        # In Max 2026, OpenPBR integrates well with MaterialX
         mat_path = os.path.join(self.get_publish_root(), "lookdev", "master_materials.mtlx")
-        # اینجا کدی اضافه می‌کنیم که متریال‌ها را به فرمت MaterialX/OpenPBR اکسپورت کند
+        # Export materials as MaterialX/OpenPBR
         
-        # ۳. ذخیره نسخه مکس به عنوان فایل اصلی لوک‌دِو
+        # 3. Save the Max file as the lookdev source
         self.run_publish_process(data)
 
     def run_lookdev_special(self):
-        """اجرای پابلیش مخصوص لوک‌دِو (دکمه‌های اختصاصی)"""
+        """Run the lookdev-specific publish (dedicated buttons)"""
         
         if not self.task_id:
             QMessageBox.critical(None, "Error", "No Task Context!")
@@ -418,17 +418,17 @@ class MaxPublisher:
             parent = qtmax.GetQMaxMainWindow()
         except: parent = None
 
-        # --- FIX: ساخت لیست آپشن‌ها مخصوص لوک‌دِو ---
-        # اینجا دستی کلمه "lookdev" را می‌فرستیم تا گزینه‌های متریال فعال شوند
+        # --- FIX: lookdev option list ---
+        # Pass "lookdev" so material options turn on
         lookdev_opts = self.get_max_options("lookdev") 
         # ---------------------------------------------
 
-        # باز کردن دیالوگ با ارسال کانفیگ
+        # Open the dialog with that config
         self.dialog = PublishDialog(
             session, 
             self.task_id, 
             parent=parent,
-            output_config=lookdev_opts  # <--- این خط حیاتی است
+            output_config=lookdev_opts  # <--- required
         )
         self.dialog.setWindowTitle("💎 Lookdev Master Publish") 
         self.dialog.setStyleSheet(style.PUBLISH_DIALOG)
@@ -437,33 +437,33 @@ class MaxPublisher:
             data = self.dialog.get_data()
             print(">> [Cortex] Lookdev Publish started...")
             
-            # ۱. اجرای پابلیش فایل مکس
+            # 1. Publish the Max file
             self.run_publish_process(data)
             
-            # ۲. اجرای فرآیند اکسپورت متریال‌ها (اگر تیک خورده باشد)
+            # 2. Export materials if the checkbox is on
             if 'native_lib' in data['outputs'] or 'mat_lib' in data['outputs']:
                 self.export_lookdev_assets()
 
     def export_lookdev_assets(self):
-        """فراخوانی سیستم بسته‌بندی متریال بدون تبدیل"""
+        """Call the material packager with no conversion"""
         try:
             import publisher_mat_max
             import importlib
             importlib.reload(publisher_mat_max)
             
-            # دریافت انجین از دیتابیس
+            # Read the engine from the database
             engine = self.db.get_setting("render_engine", default="Octane") 
             task_name = os.environ.get("CORTEX_TASK_NAME", "out").replace(" ", "_")
             
-            # ساخت مسیر دقیق: publish/3D/lookdev/TASK_NAME
+            # Exact path: publish/3D/lookdev/TASK_NAME
             lookdev_base = self.db.get_publish_path(self.task_id, software="lookdev", category="3d")
             if not lookdev_base:
-                # مسیر جایگزین در صورت پیدا نشدن در دیتابیس
+                # Fallback path if the database has none
                 lookdev_base = os.path.join(self.get_publish_root(), "publish", "3D", "lookdev").replace("\\", "/")
                 
             final_mat_path = os.path.join(lookdev_base, task_name).replace("\\", "/")
             
-            # ارسال مسیر دقیق به پبلشر متریال
+            # Send the exact path to the material publisher
             mat_pub = publisher_mat_max.MaterialPublisher(final_mat_path)
             mat_pub.publish(engine)
             

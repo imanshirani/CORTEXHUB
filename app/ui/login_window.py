@@ -4,13 +4,13 @@ from PySide6.QtCore import Qt
 from app.ui import style
 from app.core import config
 
-class LoginWindow(QDialog): # <--- تغییر مهم: ارث‌بری از QDialog
+class LoginWindow(QDialog): # <--- Important change: Inheriting from QDialog
     def __init__(self, session_manager):
         """
         Handle   Init   operation.
         """
         super().__init__()
-        self.session = session_manager # دریافت سشن از ورودی
+        self.session = session_manager # Get session from input
         
         self.setWindowTitle("Cortex Login")
         self.setFixedSize(350, 450)
@@ -74,8 +74,8 @@ class LoginWindow(QDialog): # <--- تغییر مهم: ارث‌بری از QDial
         username = self.user_input.text().strip()
         password = self.pass_input.text().strip()
 
-        # استفاده از متد لاگین سشن منیجر
+        # Using session manager login method
         if self.session.login(username, password):
-            self.accept() # <--- مهم: این دستور پنجره را با موفقیت می‌بندد و exec را رد می‌کند
+            self.accept() # <--- Important: This command closes the window successfully and skips exec
         else:
             self.error_lbl.setText("Invalid username or password")

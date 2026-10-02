@@ -23,21 +23,21 @@ class ProductionView(QWidget):
         self.layout.setContentsMargins(30, 30, 30, 30)
         self.layout.setSpacing(20)
         
-        # 1. لیست سکانس (استایل جدید)
+        # 1. Sequence list (new style)
         self.seq_list = QListWidget()
         self.seq_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.seq_list.customContextMenuRequested.connect(self.open_seq_menu)
         self.seq_list.itemClicked.connect(self.load_shots)
         self.seq_list.setStyleSheet(style.LIST_WIDGET_STYLE) # <---
         
-        # 2. لیست شات (استایل جدید)
+        # 2. Shot list (new style)
         self.shot_list = QListWidget()
         self.shot_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.shot_list.customContextMenuRequested.connect(self.open_shot_menu)
         self.shot_list.itemClicked.connect(self.load_tasks)
         self.shot_list.setStyleSheet(style.LIST_WIDGET_STYLE) # <---
         
-        # 3. جدول تسک (استایل جدید)
+        # 3. Task table (new style)
         self.task_table = QTableWidget()
         self.task_table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.task_table.customContextMenuRequested.connect(self.open_task_menu)
@@ -51,24 +51,24 @@ class ProductionView(QWidget):
         header.setSectionResizeMode(2, QHeaderView.Fixed)            # Status
         self.task_table.setColumnWidth(2, 120)
         
-        self.task_table.verticalHeader().setDefaultSectionSize(50) # <--- ارتفاع سطرها را بیشتر کردیم تا عکس جا شود
+        self.task_table.verticalHeader().setDefaultSectionSize(50) # <--- We increased the height of the lines to fit the photo
         self.task_table.verticalHeader().setVisible(False)
         self.task_table.setStyleSheet(style.PROJECTS_TABLE)
         
-        # --- اتصال کلیک روی تسک به پنل پیش‌نمایش ---
+        # --- Binding task click to preview panel ---
         self.task_table.itemSelectionChanged.connect(self.update_preview_panel)
         
-        # 4. سلکتور پروژه
+        # 4. Project selector
         self.setup_project_selector()
 
-        # 5. ساخت پنل پیش‌نمایش (ستون چهارم)
+        # 5. Creating a preview panel (fourth column)
         self.preview_panel = QFrame()
         self.preview_panel.setStyleSheet("background-color: #2b2b2b; border-radius: 8px; padding: 10px;")
         self.preview_layout = QVBoxLayout(self.preview_panel)
         self.preview_layout.setAlignment(Qt.AlignTop)
         
         self.lbl_preview_thumb = QLabel("🖼️ No Task Selected")
-        self.lbl_preview_thumb.setFixedSize(240, 135) # سایز 16:9
+        self.lbl_preview_thumb.setFixedSize(240, 135) # Size 16:9
         self.lbl_preview_thumb.setStyleSheet("background-color: #111; border: 1px solid #444; border-radius: 4px; font-size: 14px; color: #777;")
         self.lbl_preview_thumb.setAlignment(Qt.AlignCenter)
         
@@ -88,7 +88,7 @@ class ProductionView(QWidget):
         self.preview_layout.addWidget(self.lbl_preview_desc)
         self.preview_layout.addStretch()
 
-        # 6. چیدن ویجت‌ها در 4 ستون
+        # 6. Arrange widgets in 4 columns
         columns_layout = QHBoxLayout()
         columns_layout.setSpacing(20)
         
@@ -96,7 +96,7 @@ class ProductionView(QWidget):
         columns_layout.addLayout(self.create_column("Shots", self.shot_list, self.add_shot))
         columns_layout.addLayout(self.create_column("Tasks", self.task_table, self.add_task))
         
-        # ستون چهارم
+        # The fourth column
         preview_col_layout = QVBoxLayout()
         preview_header = QLabel("Preview & Timeline")
         preview_header.setStyleSheet("font-weight: bold; color: #aaa; font-size: 14px; margin-bottom: 10px;")
@@ -113,12 +113,12 @@ class ProductionView(QWidget):
         top_layout = QHBoxLayout()
         
         lbl = QLabel("Select Project:")
-        lbl.setStyleSheet(style.SECTION_TITLE) # استفاده از تایتل استاندارد
+        lbl.setStyleSheet(style.SECTION_TITLE) # Use standard titles
         
         self.project_combo = QComboBox()
         self.project_combo.setMinimumWidth(250)
         self.project_combo.setFixedHeight(35)
-        # استایل کمبو باکس را هم می‌شود به style.py برد
+        # Combobox style can also be moved to style.py
         self.project_combo.setStyleSheet(style.COMBOBOX_STYLE)
         self.project_combo.currentIndexChanged.connect(self.on_project_changed)
         
@@ -163,7 +163,7 @@ class ProductionView(QWidget):
         btn = QPushButton("+")
         btn.setFixedSize(30, 30)
         btn.setCursor(Qt.PointingHandCursor)
-        # استفاده از استایل دکمه سبز اما کوچکتر
+        # Use the green but smaller button style
         btn.setStyleSheet(style.BTN_ADD_SMALL)
         btn.clicked.connect(add_callback)
         
@@ -175,8 +175,8 @@ class ProductionView(QWidget):
         col_layout.addWidget(widget)
         return col_layout
 
-    # ... (بقیه توابع لاجیک load_sequences, load_shots و ... بدون تغییر کپی شوند) ...
-    # فقط تابع load_tasks را چک کن که استایل رنگش خراب نشود (چون transparent گذاشتیم باید کار کند)
+    # ... (the rest of the logic functions load_sequences, load_shots and ... should be copied without change) ...
+    # Just check the load_tasks function so that the color style is not damaged (because we left it transparent, it should work)
     
     # --- Sequences Logic ---
     def load_sequences(self):
@@ -216,7 +216,7 @@ class ProductionView(QWidget):
                 if self.session.db.create_sequence(project.id, name):
                     project_full_path = os.path.join(project.root_path, project.name)
                     
-                    # اصلاح شده: فقط دو آرگومان بفرست (مسیر و نام سکانس)
+                    # Fixed: send only two arguments (path and sequence name)
                     FileSystemManager.create_sequence_structure(project_full_path, name)
                     
                     self.load_sequences()
@@ -256,29 +256,29 @@ class ProductionView(QWidget):
         seq_name = current_seq.text()
         seq_id = current_seq.data(Qt.UserRole)
         
-        # استفاده از دیالوگ جدید (ShotDialog)
+        # Using the new dialog (ShotDialog)
         dialog = ShotDialog(self.session, parent=self)
         
-        # پیدا کردن دکمه‌ها در ShotDialog
+        # Find buttons in ShotDialog
         for btn in dialog.findChildren(QPushButton):
             text = btn.text().replace("&", "")
             if text in ["OK", "Ok", "Save"]:
                 btn.setText("Save Shot")
                 btn.setStyleSheet(style.BTN_ADD_SMALL)
             elif text == "Cancel":
-                btn.hide() # حذف دکمه کنسل
+                btn.hide() # Remove the cancel button
 
         
         if dialog.exec():
             data = dialog.get_data()
             name = data["name"]
             
-            # 1. ساخت در دیتابیس
+            # 1. Construction in the database
             if self.session.db.create_shot(seq_id, name, data["start"], data["end"]):
                 
                 project_full_path = os.path.join(project.root_path, project.name)
                 
-                # پاس دادن db به عنوان آرگومان اول
+                # Passing db as the first argument
                 FileSystemManager.create_shot_structure(self.session.db, project_full_path, seq_name, name)
                 
                 self.load_shots(current_seq)
@@ -286,26 +286,26 @@ class ProductionView(QWidget):
     
 
     def edit_shot(self, item):
-        """ویرایش شات (نام + فریم‌ها) + هندل کردن تغییر نام فولدر"""
+        """Edit shot (name + frames) + handle folder renaming"""
         shot_id = item.data(Qt.UserRole)
         project = self.session.context.project
         current_seq = self.seq_list.currentItem()
         
-        # 1. گرفتن اطلاعات فعلی از دیتابیس
+        # 1. Getting the current information from the database
         shot_data = self.session.db.get_shot_by_id(shot_id)
         if not shot_data: 
             QMessageBox.warning(self, "Error", "Could not fetch shot data.")
             return
         
-        old_name = shot_data[2] # نام قدیمی شات
+        old_name = shot_data[2] # The old name of the shot
         
-        # 2. باز کردن دیالوگ با اطلاعات قبلی
+        # 2. Opening a dialog with previous information
         dialog = ShotDialog(self.session, shot_to_edit=shot_data, parent=self)
         if dialog.exec():
             data = dialog.get_data()
             new_name = data["name"]
             
-            # 3. اگر نام تغییر کرده، فولدر را رینیم کن
+            # 3. If the name has changed, rename the folder
             if new_name != old_name:
                 project_path = os.path.join(project.root_path, project.name)
                 seq_path = os.path.join(project_path, "Sequences", current_seq.text())
@@ -314,9 +314,9 @@ class ProductionView(QWidget):
                 if not FileSystemManager.rename_folder(old_shot_path, new_name):
                     QMessageBox.critical(self, "Error", 
                         f"Could not rename folder '{old_name}' on disk!\nMake sure no files are open.")
-                    return # عملیات متوقف می‌شود
+                    return # The operation stops
             
-            # 4. آپدیت دیتابیس (نام + فریم‌ها)
+            # 4. Database update (name + frames)
             if self.session.db.update_shot(shot_id, new_name, data["start"], data["end"]):
                 self.load_shots(current_seq)
             else:
@@ -337,7 +337,7 @@ class ProductionView(QWidget):
             data = dialog.get_data()
             shot_id = current_shot.data(Qt.UserRole)
             
-            # ارسال دیتای جدید تاریخ به دیتابیس
+            # Sending new date data to the database
             success = self.session.db.create_task(
                 entity_id=shot_id,
                 dept_id=data["dept_id"],
@@ -359,14 +359,14 @@ class ProductionView(QWidget):
         layout.setContentsMargins(10, 0, 5, 0)
         layout.setSpacing(8)
         
-        # مربع رنگی
+        # colored square
         color_box = QLabel()
-        color_box.setFixedSize(14, 14) # کمی کوچکتر برای تسک‌ها
+        color_box.setFixedSize(14, 14) # A little smaller for tasks
         safe_color = color_code if color_code else "transparent"
         border = "1px solid #666" if color_code else "none"
         color_box.setStyleSheet(f"background-color: {safe_color}; border: {border}; border-radius: 3px;")
         
-        # متن
+        # text
         label = QLabel(text)
         label.setStyleSheet("color: #ddd; background: transparent;")
         
@@ -393,17 +393,17 @@ class ProductionView(QWidget):
             
             self.task_table.insertRow(idx)
             
-            # ستون 0: Dept
+            # Column 0: Dept
             wdg_dept = self.create_color_widget(dept_name, color)
             wdg_dept.setToolTip(f"<b>{title}</b>")
             self.task_table.setCellWidget(idx, 0, wdg_dept)
             
-            # ستون 1: User (آیدی را اینجا ذخیره می‌کنیم)
+            # Column 1: User (we store the ID here)
             user_item = QTableWidgetItem(str(user_name))
             user_item.setData(Qt.UserRole, t_id)
             self.task_table.setItem(idx, 1, user_item)
             
-            # ستون 2: Status
+            # Column 2: Status
             status_color = style.STATUS_COLORS.get(status, "#444")
             s_wdg = self.create_color_widget(status, status_color)
             self.task_table.setCellWidget(idx, 2, s_wdg)
@@ -411,7 +411,7 @@ class ProductionView(QWidget):
         self.task_table.clearSelection()
         self.update_preview_panel()
 
-    # (توابع منوی کلیک راست همگی سرجای خودشان باشند)
+    # (Right click menu functions should all be in their place)
     def open_seq_menu(self, position):
         """
         Handle Open Seq Menu operation.
@@ -436,27 +436,27 @@ class ProductionView(QWidget):
         seq_id = item.data(Qt.UserRole)
         project = self.session.context.project
         
-        # 1. گرفتن اطلاعات از دیتابیس (حالا متد وجود دارد)
+        # 1. Getting information from the database (now there is a method)
         seq_data = self.session.db.get_sequence_by_id(seq_id)
         if not seq_data: return
 
-        # 2. باز کردن دیالوگ جدید
+        # 2. Open a new dialog
         dialog = SequenceDialog(self.session, seq_to_edit=seq_data, parent=self)
         if dialog.exec():
             new_name = dialog.get_data()
             old_name = seq_data[2]
             
             if new_name and new_name != old_name:
-                # 3. تغییر نام فولدر روی هارد
+                # 3. Rename the folder on the hard drive
                 project_path = os.path.join(project.root_path, project.name)
                 seq_root = os.path.join(project_path, "Sequences")
                 old_path = os.path.join(seq_root, old_name)
                 
                 if FileSystemManager.rename_folder(old_path, new_name):
-                    # 4. آپدیت دیتابیس
+                    # 4. Database update
                     if self.session.db.update_sequence(seq_id, new_name):
                         item.setText(new_name)
-                        self.load_sequences() # رفرش برای اطمینان
+                        self.load_sequences() # Refresh to be sure
                 
 
     def delete_sequence(self, item):
@@ -484,49 +484,49 @@ class ProductionView(QWidget):
         menu = QMenu()
         menu.setStyleSheet(style.MENU_STYLE)
         
-        # ۱. اضافه کردن گزینه شات بیلدر
+        # 1. Add shot builder option
         builder_action = menu.addAction("🎬 Build Shot Composition")
         menu.addSeparator()
         
-        # ۲. گزینه‌های ادیت و حذف (کدهای خودت)
+        # 2. Edit and delete options (your own codes)
         edit_action = menu.addAction("Edit / Rename Shot")
         delete_action = menu.addAction("Delete Shot")
         
         action = menu.exec(QCursor.pos())
         
-        # مدیریت کلیک‌ها
+        # Manage clicks
         if action == builder_action:
-            # فراخوانی متد شات بیلدر
+            # Calling the shot builder method
             from app.ui.shot_builder import ShotBuilder
             dialog = ShotBuilder(self.session, shot_id, shot_name, parent=self)
             dialog.exec()
         elif action == edit_action:
-            self.edit_shot(item) # تابع خودت
+            self.edit_shot(item) # Your own subject
         elif action == delete_action:
             self.delete_shot(item)
 
     def edit_shot(self, item):
-        """ویرایش شات (نام + فریم‌ها) + هندل کردن تغییر نام فولدر"""
+        """Edit shot (name + frames) + handle folder renaming"""
         shot_id = item.data(Qt.UserRole)
         project = self.session.context.project
         current_seq = self.seq_list.currentItem()
         
-        # 1. گرفتن اطلاعات فعلی از دیتابیس
-        # (باید تابع get_shot_by_id را در database.py داشته باشید)
+        # 1. Getting the current information from the database
+        # (You must have the function get_shot_by_id in database.py)
         shot_data = self.session.db.get_shot_by_id(shot_id)
         if not shot_data: 
             QMessageBox.warning(self, "Error", "Could not fetch shot data.")
             return
         
-        old_name = shot_data[2] # نام قدیمی شات
+        old_name = shot_data[2] # The old name of the shot
         
-        # 2. باز کردن دیالوگ با اطلاعات قبلی
+        # 2. Opening a dialog with previous information
         dialog = ShotDialog(self.session, shot_to_edit=shot_data, parent=self)
         if dialog.exec():
             data = dialog.get_data()
             new_name = data["name"]
             
-            # 3. اگر نام تغییر کرده، فولدر را رینیم کن
+            # 3. If the name has changed, rename the folder
             if new_name != old_name:
                 project_path = os.path.join(project.root_path, project.name)
                 seq_path = os.path.join(project_path, "Sequences", current_seq.text())
@@ -535,9 +535,9 @@ class ProductionView(QWidget):
                 if not FileSystemManager.rename_folder(old_shot_path, new_name):
                     QMessageBox.critical(self, "Error", 
                         f"Could not rename folder '{old_name}' on disk!\nMake sure no files are open.")
-                    return # عملیات متوقف می‌شود
+                    return # The operation stops
             
-            # 4. آپدیت دیتابیس (نام + فریم‌ها)
+            # 4. Database update (name + frames)
             if self.session.db.update_shot(shot_id, new_name, data["start"], data["end"]):
                 self.load_shots(current_seq)
             else:
@@ -560,7 +560,7 @@ class ProductionView(QWidget):
         row = self.task_table.currentRow()
         if row == -1: return
         
-        # خواندن ID از ستون 1
+        # Read ID from column 1
         item = self.task_table.item(row, 1)
         if not item: return
         task_id = item.data(Qt.UserRole)
@@ -569,7 +569,7 @@ class ProductionView(QWidget):
         menu.setStyleSheet(style.MENU_STYLE)
         view_action = menu.addAction("View Details")
         
-        # اضافه کردن گزینه Edit
+        # Add Edit option
         edit_action = menu.addAction("Edit Task") 
         
         menu.addSeparator()
@@ -587,12 +587,12 @@ class ProductionView(QWidget):
         
         if action == view_action:
             self.view_task_details(task_id)
-        elif action == edit_action:    # هندل کردن ادیت
+        elif action == edit_action:    # Edit handling
             self.edit_task(task_id)
         elif action == del_action:
             self.delete_task(task_id)
 
-    # --- تابع جدید برای انجام عملیات ادیت ---
+    # --- New function to perform editing operations ---
     def edit_task(self, task_id):
         """
         Handle Edit Task operation.
@@ -617,16 +617,16 @@ class ProductionView(QWidget):
             )
             if success: self.load_tasks(self.shot_list.currentItem())
 
-    # --- تابع جدید برای باز کردن دیالوگ ---
+    # --- New function to open dialog ---
     def view_task_details(self, task_id):
         """
         Handle View Task Details operation.
         """
-        # 1. گرفتن اطلاعات تازه از دیتابیس
+        # 1. Getting new information from the database
         task_data = self.session.db.get_task_by_id(task_id)
         
         if task_data:
-            # 2. نمایش دیالوگ
+            # 2. Display dialog
             dialog = TaskDetailsDialog(task_data, parent=self)
             dialog.exec()
         else:
@@ -649,27 +649,27 @@ class ProductionView(QWidget):
             self.load_tasks(self.shot_list.currentItem())
 
     def create_preview_widget(self, title, start_date, due_date):
-        """ساخت ویجت برای ستون اول: عکس + تایتل + تاریخ"""
+        """Create a widget for the first column: photo + title + date"""
         wdg = QWidget()
         layout = QHBoxLayout(wdg)
         layout.setContentsMargins(10, 5, 10, 5)
         layout.setSpacing(10)
         
-        # بخش عکس (پلیسهولدر - در آینده عکس واقعی پابلیش را از دیتابیس می‌خوانیم)
+        # Photo section (placeholder - in the future, we will read the actual published photo from the database)
         lbl_thumb = QLabel()
         lbl_thumb.setFixedSize(80, 50)
         lbl_thumb.setStyleSheet("background-color: #222; border-radius: 4px; border: 1px solid #444;")
-        lbl_thumb.setText("🖼️") # آیکون موقت
+        lbl_thumb.setText("🖼️") # Temporary icon
         lbl_thumb.setAlignment(Qt.AlignCenter)
         
-        # بخش متن و تایم‌لاین
+        # Text and timeline section
         text_layout = QVBoxLayout()
         text_layout.setSpacing(2)
         
         lbl_title = QLabel(f"<b>{title}</b>")
         lbl_title.setStyleSheet("color: white; font-size: 13px;")
         
-        # تایم‌لاین زیبا
+        # Beautiful timeline
         sd = start_date if start_date else "----/--/--"
         dd = due_date if due_date else "----/--/--"
         lbl_time = QLabel(f"⏱️ {sd}  ➔  {dd}")
@@ -702,28 +702,28 @@ class ProductionView(QWidget):
             
             self.task_table.insertRow(idx)
             
-            # ستون 0: Dept
+            # Column 0: Dept
             wdg_dept = self.create_color_widget(dept_name, color)
             wdg_dept.setToolTip(f"<b>{title}</b>")
             self.task_table.setCellWidget(idx, 0, wdg_dept)
             
-            # ستون 1: User (آیدی را اینجا ذخیره می‌کنیم تا کلیک‌راست کار کند)
+            # Column 1: User (we save the ID here so that right click works)
             user_item = QTableWidgetItem(str(user_name))
             user_item.setData(Qt.UserRole, t_id)
             self.task_table.setItem(idx, 1, user_item)
             
-            # ستون 2: Status
+            # Column 2: Status
             status_color = style.STATUS_COLORS.get(status, "#444")
             s_wdg = self.create_color_widget(status, status_color)
             self.task_table.setCellWidget(idx, 2, s_wdg)
 
         self.task_table.clearSelection()
-        # این خط باعث می‌شود وقتی لیست لود شد، پنل سمت راست آپدیت شود
+        # This line causes the right panel to update when the list is loaded
         self.update_preview_panel()
 
 
     def update_preview_panel(self):
-        """لود کردن اطلاعات تسک انتخاب شده به همراه عکس و تاریخ از دیتابیس"""
+        """Loading selected task information along with photo and date from database"""
         row = self.task_table.currentRow()
         if row == -1:
             self.lbl_preview_thumb.clear()
@@ -737,7 +737,7 @@ class ProductionView(QWidget):
         if not item: return
         task_id = item.data(Qt.UserRole)
         
-        # 1. گرفتن اطلاعات اصلی تسک از دیتابیس
+        # 1. Getting the main information of the task from the database
         task = self.session.db.get_task_by_id(task_id)
         if not task: return
         
@@ -750,7 +750,7 @@ class ProductionView(QWidget):
         self.lbl_preview_title.setText(f"{title}")
         self.lbl_preview_desc.setText(f"<b>Description:</b><br>{desc}")
         
-        # 2. گرفتن آخرین عکس و تاریخ پابلیش از جدول publishes
+        # 2. Taking the last photo and publication date from the publish table
         try:
             query = """
                 SELECT thumbnail_path, created_at, version 
@@ -766,7 +766,7 @@ class ProductionView(QWidget):
 
         publish_info = ""
 
-        # 3. چک کردن اینکه آیا عکسی وجود دارد یا نه
+        # 3. Checking if there is a photo or not
         if latest_pub:
             thumb_path = latest_pub[0]
             pub_date = latest_pub[1]
@@ -786,34 +786,34 @@ class ProductionView(QWidget):
             self.lbl_preview_thumb.setText("🖼️ No Publish Yet")
             publish_info = "<br><br>✨ Last Publish: <b>None</b>"
 
-        # 4. آپدیت متن تایم‌لاین
+        # 4. Timeline text update
         self.lbl_preview_timeline.setText(f"📅 Start: <b>{start_date}</b><br>🚨 Due: <b>{due_date}</b><br>⏱️ Est. Time: <b>{hours} hrs</b>{publish_info}")
 
 
     def select_task_row(self, task_id):
-        """پیدا کردن سطر تسک، اسکرول به آن و آپدیت تصویر"""
+        """Find the task line, scroll to it and update the image"""
         for row in range(self.task_table.rowCount()):
             item = self.task_table.item(row, 1) 
-            # تبدیل به string برای اطمینان از تطابق دقیق
+            # Convert to string to ensure exact match
             if item and str(item.data(Qt.UserRole)) == str(task_id):
                 self.task_table.selectRow(row)
-                self.task_table.scrollToItem(item) # ---> اسکرول خودکار به سمت تسک
-                self.update_preview_panel()        # ---> اجرای قطعی پیش‌نمایش
+                self.task_table.scrollToItem(item) # ---> Auto scroll to task
+                self.update_preview_panel()        # ---> Definitive execution of the preview
                 break
 
     def jump_to_task(self, ctx):
-        """پیدا کردن و انتخاب اتوماتیک پروژه، سکانس، شات و تسک"""
-        # 1. تنظیم پروژه
+        """Automatic search and selection of project, sequence, shot and task"""
+        # 1. Setting up the project
         idx = self.project_combo.findData(ctx["project_id"])
         if idx >= 0:
             if self.project_combo.currentIndex() != idx:
                 self.project_combo.setCurrentIndex(idx)
             else:
-                # اگر پروژه همان بود، مطمئن شویم لیست‌ها خالی نیستند
+                # If the project is the same, make sure the lists are not empty
                 if self.seq_list.count() == 0:
                     self.load_sequences()
 
-        # 2. پیدا کردن سکانس
+        # 2. Find the sequence
         for i in range(self.seq_list.count()):
             item = self.seq_list.item(i)
             if item.text() == ctx["parent_name"]: 
@@ -821,7 +821,7 @@ class ProductionView(QWidget):
                 self.load_shots(item) 
                 break
         
-        # 3. پیدا کردن شات
+        # 3. Find the shot
         for i in range(self.shot_list.count()):
             item = self.shot_list.item(i)
             if str(item.data(Qt.UserRole)) == str(ctx["entity_id"]):
@@ -829,5 +829,5 @@ class ProductionView(QWidget):
                 self.load_tasks(item) 
                 break
         
-        # 4. اسکرول و انتخاب دقیق تسک
+        # 4. Scrolling and choosing the exact task
         self.select_task_row(ctx["task_id"])

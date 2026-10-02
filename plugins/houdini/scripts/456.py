@@ -4,18 +4,18 @@ import os
 import hdefereval
 
 def setup_cortex_interface():
-    """نمایش وضعیت تسک و ورژن‌ها در کنسول یا نوار وضعیت هودینی"""
+    """Show task status and versions in the Houdini console or status bar"""
     task_name = os.environ.get("CORTEX_TASK_NAME", "Unknown")
     work_path = os.environ.get("CORTEX_WORK_PATH", "")
     
-    # چاپ وضعیت در نوار پایین هودینی (Status Bar)
+    # Print status on the Houdini status bar
     hou.ui.setStatusMessage(f"Cortex Pipeline | Task: {task_name} | Path: {work_path}")
     print(f">> [Cortex] Ready for Task: {task_name}")
 
 setup_cortex_interface()
 
 def setup_houdini_scene():
-    """تنظیمات اولیه صحنه مطابق با استانداردهای پروژه"""
+    """Initial scene settings from project standards"""
     print(">> [Cortex] Initializing Houdini Scene...")
     
     try:
@@ -25,7 +25,7 @@ def setup_houdini_scene():
 
         hou.setFps(fps)
         
-        # تنظیم رزولوشن (برای زمانی که نود Mantra یا Karma ساخته میشه)
+        # Resolution for when a Mantra or Karma node is created
         for node in hou.nodeType(hou.ropNodeTypeCategory(), "ifd").instances():
             node.parm("res_override").set(1)
             node.parm("res_fraction").set("specific")
@@ -37,7 +37,7 @@ def setup_houdini_scene():
         print(f"!! [Cortex] Setup Error: {e}")
 
 def force_show_cortex_shelf():
-    """نمایش خودکار تب کورتکس در نوار ابزار هودینی"""
+    """Auto-show the Cortex tab on the Houdini toolbar"""
     try:
         desktop = hou.ui.curDesktop()
         if not desktop: return
@@ -46,17 +46,17 @@ def force_show_cortex_shelf():
         current_sets = shelf_dock.shelfSets()
         if not current_sets: return
         
-        # انتخاب دسته فعلی (معمولا همون اولی)
+        # Current shelf set (usually the first one)
         active_set = current_sets[0] 
         current_shelves = list(active_set.shelves())
         
-        # پیدا کردن تب کورتکس
+        # Find the Cortex tab
         cortex_shelf = hou.shelves.shelves().get("cortex_shelf_tab")
         
         if cortex_shelf:
             if cortex_shelf not in current_shelves:
                 current_shelves.append(cortex_shelf)
-                # تب را به دسته (Set) اضافه می‌کنیم، نه به داک
+                # Add the tab to the set, not the dock
                 active_set.setShelves(current_shelves) 
                 print(">> [Cortex] Toolbar tab loaded into UI.")
         else:
@@ -65,21 +65,21 @@ def force_show_cortex_shelf():
     except Exception as e:
         print(f"!! [Cortex] Shelf Error: {e}")
 
-# اجرای دستورات
+# Run the commands
 setup_houdini_scene()
 
 
 def show_cortex_banner():
-    """نمایش اطلاعات تسک در لحظه ورود"""
+    """Show task info on session start"""
     task = os.environ.get("CORTEX_TASK_NAME", "Unknown Task")
     user = os.environ.get("CORTEX_USER", "Artist")
     
     message = f"--- CORTEX PIPELINE --- | USER: {user} | TASK: {task}"
     
-    # نمایش در Status Bar پایین هودینی
+    # Houdini status bar
     hou.ui.setStatusMessage(message)
     
-    # ساخت یک نود یادداشت (Sticky Note) در محیط OBJ برای راهنمایی آرتیست (اختیاری)
+    # Optional sticky note in OBJ to guide the artist
     obj = hou.node("/obj")
     note_name = "CORTEX_INFO"
     existing = obj.node(note_name)
@@ -92,11 +92,11 @@ show_cortex_banner()
 
 def update_houdini_title():
     task = os.environ.get("CORTEX_TASK_NAME", "No Task")
-    ver = "v000" # این را می‌توانیم داینامیک کنیم
-    # تغییر عنوان پنجره هودینی
+    ver = "v000" # Can be made dynamic later
+    # Change the Houdini window title
     hou.ui.setStatusMessage(f"Cortex Pipeline | Task: {task} | {ver}")
 
 update_houdini_title()
 
-# هودینی باید اول UI رو لود کنه بعد شلف رو اضافه کنیم، پس از hdefereval استفاده می‌کنیم
+# Houdini must load UI first; defer the shelf with hdefereval
 hdefereval.executeDeferred(force_show_cortex_shelf)

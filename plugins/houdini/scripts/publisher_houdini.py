@@ -13,7 +13,7 @@ except:
 from app.core.database import DatabaseManager
 
 def capture_thumbnail(output_path):
-    """گرفتن عکس از ویوپورت هودینی (Flipbook) برای پریویو"""
+    """Flipbook the Houdini viewport for a preview"""
     try:
         desktop = hou.ui.curDesktop()
         scene_viewer = desktop.paneTabOfType(hou.paneTabType.SceneViewer)
@@ -47,7 +47,7 @@ def run_publish_logic(node):
         hou.ui.displayMessage("Please select a Target Node to export (e.g., /obj/box_object1/OUT_BOX)")
         return
 
-    # استخراج نام تسک برای ساخت زیرپوشه (مثلاً BODY یا HEAD)
+    # Task name becomes a subfolder (e.g. BODY or HEAD)
     task_name = os.environ.get("CORTEX_TASK_NAME", "out").replace(" ", "_")
 
     dest_cache = db.get_publish_path(task_id, software=output_type, category="3d")
@@ -57,7 +57,7 @@ def run_publish_logic(node):
         hou.ui.displayMessage("Error: Could not resolve publish path from database.")
         return
 
-    # --- اضافه کردن زیرپوشه تسک به مسیرهای پابلیش ---
+    # --- Add the task subfolder to publish paths ---
     dest_cache = os.path.join(dest_cache, task_name).replace("\\", "/")
     dest_hip = os.path.join(dest_hip, task_name).replace("\\", "/")
     # -----------------------------------------------
@@ -79,11 +79,11 @@ def run_publish_logic(node):
     print(f">> [Cortex] Target Cache Path: {final_cache_path}")
 
     try:
-        # الف) ذخیره فایل اصلی هودینی
+        # a) Save the main Houdini file
         hou.hipFile.save(final_hip_path)
         capture_thumbnail(thumb_path)
         
-        # ج) اکسپورت دیتا (ABC یا VDB)
+        # c) Export data (ABC or VDB)
         if output_type == "vdb":
             target_path.geometry().saveToFile(final_cache_path)
             print(">> [Cortex] VDB Export Complete.")
@@ -108,7 +108,7 @@ def run_publish_logic(node):
                 
             print(">> [Cortex] Alembic Export Complete.")
             
-        # ۴. ثبت در دیتابیس
+        # 4. Register in the database
         db.create_publish(
             task_id=task_id,
             version=ver,

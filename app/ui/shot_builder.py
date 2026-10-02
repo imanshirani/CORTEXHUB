@@ -19,12 +19,12 @@ class ShotBuilder(QDialog):
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(f"Select Assets for this Shot:"))
 
-        # لیست اَسِت‌ها با قابلیت چک‌باکس
+        # List of assets with checkbox functionality
         self.asset_list = QListWidget()
         self.asset_list.setStyleSheet(style.LIST_WIDGET_STYLE) 
         layout.addWidget(self.asset_list)
 
-        # دکمه‌ها
+        # Buttons
         btn_layout = QHBoxLayout()
         btn_save = QPushButton("Save Composition")
         btn_save.setStyleSheet(style.BTN_SUCCESS)
@@ -36,12 +36,12 @@ class ShotBuilder(QDialog):
         self.load_assets()
 
     def load_assets(self):
-        """لود کردن تمام اَسِت‌های پروژه و تیک زدن موارد لینک شده"""
-        # ۱. گرفتن تمام اَسِت‌های پروژه فعلی
+        """Loading all the project assets and ticking the linked items"""
+        # 1. Get all the assets of the current project
         proj_id = self.session.context.project.id
-        all_assets = self.session.db.get_assets(proj_id, None) # None برای دریافت تمام کتگوری‌ها
+        all_assets = self.session.db.get_assets(proj_id, None) # None to get all categories
         
-        # ۲. گرفتن آیدی اَسِت‌هایی که قبلاً به این شات لینک شده‌اند
+        # 2. Get the ID assets that are already linked to this shot
         current_links = [str(a[0]) for a in self.session.db.get_shot_assets_extended(self.shot_id)]
 
         for asset in all_assets:
@@ -50,7 +50,7 @@ class ShotBuilder(QDialog):
             item.setData(Qt.UserRole, asset[0])
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             
-            # اگر قبلاً لینک شده بود، تیک بزن
+            # Tick ​​if it was already linked
             if str(asset[0]) in current_links:
                 item.setCheckState(Qt.Checked)
             else:

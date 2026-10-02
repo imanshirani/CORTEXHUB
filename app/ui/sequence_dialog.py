@@ -39,7 +39,7 @@ class SequenceDialog(QDialog):
         layout.addLayout(btn_layout)
         
         if self.seq_to_edit:
-            # دیتای بازگشتی از دیتابیس: (id, project_id, name)
+            # Data returned from the database: (id, project_id, name)
             self.name_input.setText(self.seq_to_edit[2])
 
     def get_data(self):

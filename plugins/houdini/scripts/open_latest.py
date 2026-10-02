@@ -5,7 +5,7 @@ import glob
 import re
 
 def run():
-    """پیدا کردن و باز کردن آخرین ورژن موجود در پوشه ورک"""
+    """Find and open the latest version in the work folder"""
     work_path = os.environ.get("CORTEX_WORK_PATH")
     task_name = os.environ.get("CORTEX_TASK_NAME", "Houdini_Task")
 
@@ -13,18 +13,18 @@ def run():
         hou.ui.displayMessage("Error: Work path not found!")
         return
 
-    # جستجوی تمام فایل‌های .hip در پوشه ورک
+    # Search every .hip in the work folder
     files = glob.glob(os.path.join(work_path, f"{task_name}_v*.hip*"))
     
     if not files:
         hou.ui.displayMessage("No versions found to load!")
         return
 
-    # مرتب‌سازی بر اساس عدد ورژن
+    # Sort by version number
     files.sort(key=lambda x: int(re.findall(r'_v(\d+)', x)[-1]) if re.findall(r'_v(\d+)', x) else 0)
     latest_file = files[-1].replace("\\", "/")
 
-    # باز کردن فایل در هودینی
+    # Open in Houdini
     if hou.hipFile.hasUnsavedChanges():
         res = hou.ui.displayCustomConfirmation("Save changes to current scene before loading latest?", 
                                                buttons=("Save and Open", "Open without Saving", "Cancel"))

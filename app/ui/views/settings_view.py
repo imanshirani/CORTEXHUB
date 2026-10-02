@@ -23,32 +23,32 @@ class SettingsView(QWidget):
         
         layout = QVBoxLayout(self)
         
-        # عنوان صفحه
+        # Page title
         title = QLabel("Settings")
         title.setStyleSheet(style.SETTINGS_TITLE)
         layout.addWidget(title)
 
-        # تب‌ها
+        # Tabs
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet(style.TAB_STYLE)
         
-        # 1. پروفایل
+        # 1. Profile
         self.profile_tab = QWidget()
         self.setup_profile_tab()
         self.tabs.addTab(self.profile_tab, "My Profile")
 
-        # 2. ابزارها (تنظیمات لوکال مثل مسیر نرم‌افزارها) - [NEW TAB]
+        # 2. Tools (local settings such as software paths) - [NEW TAB]
         self.utility_tab = QWidget()
         self.setup_utility_tab()
         self.tabs.addTab(self.utility_tab, "Utilities")
         
-        # 2. تنظیمات ادمین (فقط اگر ادمین باشد)
+        # 2. Admin settings (admins only)
         if self.user.role == "admin":
             self.admin_tab = QWidget()
-            self.setup_admin_tab() # حالا این تابع کدهای جدید را هم دارد
+            self.setup_admin_tab() # This function now includes the new code
             self.tabs.addTab(self.admin_tab, "Admin Config")
         
-        # 3. درباره ما
+        # 3. About
         self.about_tab = QWidget()
         self.setup_about_tab()
         self.tabs.addTab(self.about_tab, "About")
@@ -66,7 +66,7 @@ class SettingsView(QWidget):
         layout.setSpacing(15)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        # هشدار
+        # Warning
         info = QLabel("⚠ These settings affect the entire studio. Change with caution.")
         info.setStyleSheet(style.ADMIN_WARNING_LBL)
         layout.addWidget(info)
@@ -117,13 +117,13 @@ class SettingsView(QWidget):
 
         # --- Section 2: Software Settings ---
         
-        # --- بخش مدیریت لیست‌ها (نرم‌افزار و رندر) ---
+        # --- List management (software and render engines) ---
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
         line.setStyleSheet("background-color: #444; margin: 10px 0;")
         layout.addWidget(line)
 
-        # فیلد لیست نرم‌افزارها
+        # Software list field
         layout.addWidget(QLabel("Allowed Softwares (Comma Separated):"))
         self.sw_list_input = QLineEdit()
         self.sw_list_input.setPlaceholderText("e.g. all, 3ds Max, Blender, Maya")
@@ -132,7 +132,7 @@ class SettingsView(QWidget):
         self.sw_list_input.setText(current_sw)
         layout.addWidget(self.sw_list_input)
 
-        # فیلد لیست موتورهای رندر
+        # Render-engine list field
         layout.addWidget(QLabel("Render Engines (Comma Separated):"))
         self.engine_list_input = QLineEdit()
         self.engine_list_input.setPlaceholderText("e.g. V-Ray, Octane, Redshift")
@@ -155,7 +155,7 @@ class SettingsView(QWidget):
         self.proj_struct_edit.setStyleSheet(style.INPUT_STYLE)
         layout.addWidget(self.proj_struct_edit)
 
-        # 2. Asset Structure (اضافه شد!)
+        # 2. Asset Structure (added)
         layout.addWidget(QLabel("Asset Folders Structure (JSON Dict):"))
         layout.addWidget(QLabel("Example: {\"work\": {\"3D\": [\"model\"]}, \"publish\": {\"2D\": [\"texture\"]}}", styleSheet="color:#777; font-size:10px;"))
         self.asset_struct_edit = QTextEdit()
@@ -171,12 +171,12 @@ class SettingsView(QWidget):
         self.shot_struct_edit.setStyleSheet(style.INPUT_STYLE)
         layout.addWidget(self.shot_struct_edit)
 
-        # لود کردن اطلاعات جیسون داخل باکس‌ها
+        # Load JSON into the boxes
         self.load_folder_config()
 
         layout.addStretch()
 
-        # دکمه ذخیره
+        # Save button
         btn_save = QPushButton("Save Config")
         btn_save.setFixedWidth(150)
         btn_save.setFixedHeight(40)
@@ -193,20 +193,20 @@ class SettingsView(QWidget):
         """
         Handle Load Folder Config operation.
         """
-        # خواندن تنظیمات فولدر و نمایش در تکست‌باکس‌ها
+        # Read folder settings and show them in the text boxes
         proj_data = FileSystemManager.get_project_structure(self.session.db)
-        asset_data = FileSystemManager.get_asset_structure(self.session.db) # اضافه شد
+        asset_data = FileSystemManager.get_asset_structure(self.session.db) # added
         shot_data = FileSystemManager.get_shot_structure(self.session.db)
         
         self.proj_struct_edit.setText(json.dumps(proj_data, indent=4))
-        self.asset_struct_edit.setText(json.dumps(asset_data, indent=4)) # اضافه شد
+        self.asset_struct_edit.setText(json.dumps(asset_data, indent=4)) # added
         self.shot_struct_edit.setText(json.dumps(shot_data, indent=4))
 
     def save_admin_config(self):
         """
         Handle Save Admin Config operation.
         """
-        # 1. گرفتن مقادیر عمومی
+        # 1. Read general values
         new_path = self.path_input.text()
         new_fps = self.fps_combo.currentText()
         new_w = self.width_input.text()
@@ -214,32 +214,32 @@ class SettingsView(QWidget):
         new_sw_list = self.sw_list_input.text() 
         new_engine_list = self.engine_list_input.text()
         
-        # 2. گرفتن مقادیر جیسون
+        # 2. Read JSON values
         proj_text = self.proj_struct_edit.toPlainText()
-        asset_text = self.asset_struct_edit.toPlainText() # اضافه شد
+        asset_text = self.asset_struct_edit.toPlainText() # added
         shot_text = self.shot_struct_edit.toPlainText()
 
-        # اعتبارسنجی
+        # Validation
         if not new_path or not new_w or not new_h:
             QMessageBox.warning(self, "Error", "General fields cannot be empty.")
             return
 
         try:
-            # تست می‌کنیم که آیا متن وارد شده جیسون معتبر است؟
+            # Check that the entered text is valid JSON
             json.loads(proj_text)
-            json.loads(asset_text) # اضافه شد
+            json.loads(asset_text) # added
             json.loads(shot_text)
         except json.JSONDecodeError as e:
             QMessageBox.critical(self, "Syntax Error", f"Invalid JSON format!\n{e}")
             return
             
-        # ذخیره همه تنظیمات در دیتابیس
+        # Save all settings to the database
         self.session.db.set_setting("server_path", new_path)
         self.session.db.set_setting("global_fps", new_fps)
         self.session.db.set_setting("default_width", new_w)
         self.session.db.set_setting("default_height", new_h)
         self.session.db.set_setting("project_structure", proj_text)
-        self.session.db.set_setting("asset_structure", asset_text)  # اضافه شد
+        self.session.db.set_setting("asset_structure", asset_text)  # added
         self.session.db.set_setting("shot_structure", shot_text)       
         self.session.db.set_setting("allowed_softwares_list", new_sw_list)
         self.session.db.set_setting("render_engines_list", new_engine_list)
@@ -332,11 +332,11 @@ class SettingsView(QWidget):
     # ----------------------------------------
     def setup_utility_tab(self):
         """
-        اضافه کردن تمام نرم‌افزارهای سه‌بعدی، ادیت، موشن‌گرافیک، کامپوزیت و دو‌بعدی 
-        به تنظیمات لوکال جهت استفاده در لانچر کورتکس.
+        Add every 3D, edit, motion-graphics, compositing, and 2D application
+        to local settings for the Cortex launcher.
         """
         layout = QVBoxLayout(self.utility_tab)
-        layout.setSpacing(8) # فاصله کمتر برای جا شدن تمام موارد در صفحه
+        layout.setSpacing(8) # Tighter spacing so everything fits on the page
         layout.setContentsMargins(30, 20, 30, 20)
         
         info = QLabel("These settings are saved locally on this computer's registry.")
@@ -346,10 +346,10 @@ class SettingsView(QWidget):
         layout.addWidget(QLabel("Local Software Executable Paths:", 
                                styleSheet="color:#007acc; font-weight:bold; font-size:14px;"))
 
-        # استفاده از QSettings برای ذخیره در رجیستری ویندوز (Cortex/Pipeline)
+        # Use QSettings to store paths in the Windows registry (Cortex/Pipeline)
         self.local_settings = QSettings("Cortex", "Pipeline")
         
-        # دسته‌بندی نرم‌افزارهای شما برای نظم بهتر در لیست
+        # Group software for a cleaner list
         softwares = [
             ("--- 3D SOFTWARE ---", None),
             ("3ds Max", "max_path"),
@@ -371,11 +371,11 @@ class SettingsView(QWidget):
             ("GIMP", "gimp_path")
         ]
 
-        self.path_inputs = {} # دیکشنری برای ذخیره رفرنس فیلدها
+        self.path_inputs = {} # Dictionary of field references
 
         for label, key in softwares:
             if key is None:
-                # این یک جداکننده (Header) است
+                # Section header
                 header = QLabel(label)
                 header.setStyleSheet("color: #555; font-weight: bold; margin-top: 10px; border-bottom: 1px solid #333;")
                 layout.addWidget(header)
@@ -387,13 +387,13 @@ class SettingsView(QWidget):
             line_edit = QLineEdit()
             line_edit.setPlaceholderText(f"Select {label} executable file...")
             line_edit.setStyleSheet(style.LOGIN_INPUT)
-            # لود کردن مقدار ذخیره شده قبلی
+            # Load the previously saved value
             line_edit.setText(self.local_settings.value(key, ""))
             
             btn_browse = QPushButton("...")
             btn_browse.setFixedWidth(40)
             btn_browse.setCursor(Qt.PointingHandCursor)
-            # اتصال دکمه براوز به فیلد مربوطه
+            # Connect the browse button to its field
             btn_browse.clicked.connect(lambda checked=False, le=line_edit: self.browse_exe(le))
             
             path_layout.addWidget(line_edit)
@@ -404,16 +404,16 @@ class SettingsView(QWidget):
 
         layout.addStretch()
 
-        # دکمه ذخیره نهایی
+        # Final save button
         btn_save = QPushButton("💾 SAVE ALL SOFTWARE PATHS")
         btn_save.setFixedHeight(45)
         btn_save.setCursor(Qt.PointingHandCursor)
-        btn_save.setStyleSheet(style.BTN_SUCCESS) # استفاده از استایل سبز برای تایید
+        btn_save.setStyleSheet(style.BTN_SUCCESS) # Green confirm style
         btn_save.clicked.connect(self.save_utility_settings)
         layout.addWidget(btn_save)
 
     def save_utility_settings(self):
-        """ذخیره تمام مسیرهای وارد شده در رجیستری سیستم"""
+        """Save all entered paths in the system registry"""
         for key, line_edit in self.path_inputs.items():
             self.local_settings.setValue(key, line_edit.text())
         

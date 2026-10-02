@@ -33,7 +33,7 @@ def setup_maya_scene():
     utils.executeDeferred(create_cortex_native_shelf)
 
 def create_cortex_native_shelf():
-    """ساخت شلف کاملاً نیتیو مایا با دکمه‌های پایپلاین"""
+    """Build a native Maya shelf with pipeline buttons"""
     shelf_name = "Cortex"
     
     if cmds.shelfLayout(shelf_name, exists=True):
@@ -45,9 +45,9 @@ def create_cortex_native_shelf():
         cmds.shelfLayout(shelf_name)
         
         # ---------------------------------------------------------
-        # دکمه ۱: OPEN LATEST (جدید)
+        # Button 1: OPEN LATEST (new)
         # ---------------------------------------------------------
-        # این اسکریپت اتوماتیک آخرین فایل پوشه تسک را پیدا و باز می‌کند
+        # Finds and opens the latest file in the task folder
         cmd_latest = """import os
 import maya.cmds as cmds
 work = os.environ.get('CORTEX_WORK_PATH', '')
@@ -71,12 +71,12 @@ else: cmds.warning('Task folder not found! Launch from Hub.')"""
             annotation="Open Latest Work File for Current Task",
             imageOverlayLabel="LATEST",  
             image="timeplay.png", 
-            backgroundColor=(0.5, 0.1, 0.6), # رنگ بنفش
+            backgroundColor=(0.5, 0.1, 0.6), # purple
             width=50, height=37
         )
 
         # ---------------------------------------------------------
-        # دکمه ۲: LOADER
+        # Button 2: LOADER
         # ---------------------------------------------------------
         cmd_loader = "import loader; import importlib; importlib.reload(loader); loader.run()"
         cmds.shelfButton(
@@ -89,7 +89,7 @@ else: cmds.warning('Task folder not found! Launch from Hub.')"""
         )
         
         # ---------------------------------------------------------
-        # دکمه ۳: PUBLISHER
+        # Button 3: PUBLISHER
         # ---------------------------------------------------------
         cmd_publish = "import publisher_maya; import importlib; importlib.reload(publisher_maya); pub = publisher_maya.MayaPublisher(); pub.show_dialog()"
         cmds.shelfButton(
@@ -102,7 +102,7 @@ else: cmds.warning('Task folder not found! Launch from Hub.')"""
         )
         
         # ---------------------------------------------------------
-        # دکمه ۴: SAVE
+        # Button 4: SAVE
         # ---------------------------------------------------------
         cmd_save = "import save_view; import importlib; importlib.reload(save_view); win = save_view.SaveWindow(); win.show()"
         cmds.shelfButton(
@@ -118,5 +118,5 @@ else: cmds.warning('Task folder not found! Launch from Hub.')"""
     except Exception as e:
         print(f"!! [Cortex] Failed to create Shelf: {e}")
 
-# اجرای تنظیمات و ساخت شلف در زمان بالا آمدن مایا
+# Apply settings and build the shelf when Maya starts
 setup_maya_scene()

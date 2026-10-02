@@ -14,11 +14,11 @@ class UsersView(QWidget):
         
         layout = QVBoxLayout(self)
         
-        # 1. تنظیمات لی‌اوت (مشابه Projects View)
+        # 1. Layout settings (same as Projects View)
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(20)
         
-        # 2. هدر
+        # 2. Header
         header_layout = QHBoxLayout()
         title = QLabel("Manage Users")
         title.setStyleSheet(style.SECTION_TITLE)
@@ -26,7 +26,7 @@ class UsersView(QWidget):
         self.btn_add = QPushButton("+ Add User")
         self.btn_add.setFixedSize(120, 35)
         self.btn_add.setCursor(Qt.PointingHandCursor)
-        self.btn_add.setStyleSheet(style.BTN_NEW_PROJECT) # استفاده از دکمه سبز استاندارد
+        self.btn_add.setStyleSheet(style.BTN_NEW_PROJECT) # Standard green button
         self.btn_add.clicked.connect(self.open_add_dialog)
         
         header_layout.addWidget(title)
@@ -34,15 +34,15 @@ class UsersView(QWidget):
         header_layout.addWidget(self.btn_add)
         layout.addLayout(header_layout)
 
-        # 3. جدول کاربران
+        # 3. Users table
         self.table = QTableWidget()
-        self.table.setColumnCount(5) # از 4 به 5 تغییر کرد
+        self.table.setColumnCount(5) # Changed from 4 to 5
         self.table.setHorizontalHeaderLabels(["Name", "Username", "Role", "Department", "Actions"])
         
-        # غیرفعال کردن ویرایش مستقیم سلول‌ها (دابل کلیک)
+        # Disable in-cell editing (double-click)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         
-        # تنظیم ستون‌ها
+        # Column setup
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Stretch) # Name
         header.setSectionResizeMode(1, QHeaderView.Stretch) # Username
@@ -52,14 +52,14 @@ class UsersView(QWidget):
         header.setSectionResizeMode(4, QHeaderView.Fixed)
         self.table.setColumnWidth(4, 140) # Actions
         
-        # تنظیمات ظاهری جدول
-        self.table.verticalHeader().setDefaultSectionSize(50) # ارتفاع ردیف
-        self.table.verticalHeader().setVisible(True) # نمایش شماره ردیف
+        # Table appearance
+        self.table.verticalHeader().setDefaultSectionSize(50) # Row height
+        self.table.verticalHeader().setVisible(True) # Show row numbers
         self.table.setStyleSheet(style.PROJECTS_TABLE)
         
         layout.addWidget(self.table)
         
-        # دکمه رفرش (اختیاری، چون معمولاً خودکار رفرش می‌کنیم)
+        # Refresh button (optional; we usually refresh automatically)
         # layout.addWidget(self.btn_refresh) 
 
         self.load_users()
@@ -74,20 +74,20 @@ class UsersView(QWidget):
         for row_idx, user in enumerate(users):
             self.table.insertRow(row_idx)
             
-            # ستون 0 تا 2: اطلاعات پایه
+            # Columns 0-2: basic info
             self.table.setItem(row_idx, 0, QTableWidgetItem(user.full_name))
             self.table.setItem(row_idx, 1, QTableWidgetItem(user.username))
             self.table.setItem(row_idx, 2, QTableWidgetItem(user.role))
             
-            # ستون 3: نمایش نام دپارتمان (جدید)
+            # Column 3: department name (new)
             dept_name = "None"
             if hasattr(user, 'dept_id') and user.dept_id:
                 dept_info = self.session.db.get_department_by_id(user.dept_id)
                 if dept_info:
-                    dept_name = dept_info[1] # نام دپارتمان
+                    dept_name = dept_info[1] # Department name
             self.table.setItem(row_idx, 3, QTableWidgetItem(dept_name))
             
-            # ستون 4: دکمه‌های عملیات (اصلاح ایندکس)
+            # Column 4: action buttons (index fix)
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
             actions_layout.setContentsMargins(0, 0, 0, 0)

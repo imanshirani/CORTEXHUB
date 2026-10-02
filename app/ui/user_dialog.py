@@ -10,7 +10,7 @@ class UserDialog(QDialog):
         """
         super().__init__(parent)
         self.session = session
-        self.user_to_edit = user_to_edit # اگر این مقدار داشته باشد یعنی حالت Edit هستیم
+        self.user_to_edit = user_to_edit # If it has this value, it means we are in Edit mode
         
         title = "Edit User" if user_to_edit else "Add New User"
         self.setWindowTitle(title)
@@ -58,7 +58,7 @@ class UserDialog(QDialog):
         self.layout.addWidget(QLabel("Department:"))
         self.dept_combo = QComboBox()
         self.dept_combo.setStyleSheet(style.COMBOBOX_STYLE)
-        # لود کردن دپارتمان‌ها با مدیریت ۵ فیلد دیتابیس
+        # Loading departments by managing 5 database fields
         self.dept_combo.addItem("None", None)
         depts = self.session.db.get_all_departments()
         for d in depts:
@@ -90,7 +90,7 @@ class UserDialog(QDialog):
         self.username_input.setText(self.user_to_edit.username)
         self.role_combo.setCurrentText(self.user_to_edit.role)
         
-        # انتخاب دپارتمان کاربر در حالت ویرایش
+        # Selecting the user's department in edit mode
         if hasattr(self.user_to_edit, 'dept_id') and self.user_to_edit.dept_id:
             index = self.dept_combo.findData(self.user_to_edit.dept_id)
             if index >= 0:

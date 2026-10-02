@@ -1,7 +1,7 @@
 import os
 
-# پیدا کردن مسیر ریشه پروژه (Cortex_Pipeline)
-# چون این فایل در app/ui قرار دارد، دو پله به عقب می‌رویم
+# Find the root path of the project (Cortex_Pipeline)
+# Because this file is located in app/ui, we go back two steps
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(_current_dir))
 
@@ -12,13 +12,13 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(_current_dir))
 # ===========================
 
 DARK_THEME = """
-/* تنظیمات کلی */
+/* General settings */
 QWidget {
     background-color: #1e1e1e;
     color: #ffffff;
     font-family: 'Segoe UI', sans-serif;
 }
-/* اسکرول بارها */
+/* Scroll many times */
 QScrollBar:vertical {
     border: none;
     background: #2d2d2d;
@@ -46,18 +46,18 @@ QPushButton:hover {
 """
 
 STATUS_COLORS = {
-    "Todo": "#7f8c8d",          # خاکستری
-    "In Progress": "#3498db",   # آبی
-    "Review": "#e67e22",        # نارنجی
-    "Done": "#27ae60"           # سبز
+    "Todo": "#7f8c8d",          # gray
+    "In Progress": "#3498db",   # blue
+    "Review": "#e67e22",        # orange
+    "Done": "#27ae60"           # green
 }
 
 # ===========================
-# 2. BUTTON GENERATOR (تابع سازنده)
+# 2. BUTTON GENERATOR
 # ===========================
 def _get_btn_style(bg_color, hover_color, text_color="white", radius="4px", font_size="13px", padding="8px"):
     """
-    این تابع یک استایل CSS استاندارد برای دکمه‌ها تولید می‌کند.
+    This function generates a standard CSS style for buttons.
     """
     return f"""
         QPushButton {{
@@ -74,7 +74,7 @@ def _get_btn_style(bg_color, hover_color, text_color="white", radius="4px", font
         }}
         QPushButton:pressed {{
             background-color: {bg_color};
-            margin-top: 1px; /* افکت کلیک امن */
+            margin-top: 1px; /* Safe click effect */
         }}
     """
 
@@ -82,7 +82,7 @@ def _get_btn_style(bg_color, hover_color, text_color="white", radius="4px", font
 # 3. GLOBAL BUTTON STYLES
 # ===========================
 
-# --- رنگ‌های اصلی ---
+# --- Primary colors ---
 COLOR_GREEN = "#28a745"
 COLOR_GREEN_HOVER = "#218838"
 
@@ -101,20 +101,20 @@ COLOR_CYAN_HOVER = "#138496"
 COLOR_GRAY = "#555555"
 COLOR_GRAY_HOVER = "#666666"
 
-# --- دکمه‌های استاندارد (بزرگ) ---
+# --- Standard (large) buttons ---
 BTN_SUCCESS = _get_btn_style(COLOR_GREEN, COLOR_GREEN_HOVER)   # Save, Add, Create
 BTN_PRIMARY = _get_btn_style(COLOR_BLUE, COLOR_BLUE_HOVER)     # Edit Main
 BTN_DANGER  = _get_btn_style(COLOR_RED, COLOR_RED_HOVER)       # Delete Main
 BTN_WARNING = _get_btn_style(COLOR_ORANGE, COLOR_ORANGE_HOVER) # Admin Warning
 BTN_SECONDARY = _get_btn_style(COLOR_GRAY, COLOR_GRAY_HOVER)   # Cancel
 
-# --- دکمه‌های جدول (کوچک) ---
+# --- Table buttons (small) ---
 BTN_SM_EDIT   = _get_btn_style(COLOR_BLUE, COLOR_BLUE_HOVER, font_size="11px", padding="2px 5px")
 BTN_SM_DELETE = _get_btn_style(COLOR_RED, COLOR_RED_HOVER, font_size="11px", padding="2px 5px")
 BTN_SM_INFO   = _get_btn_style(COLOR_CYAN, COLOR_CYAN_HOVER, font_size="11px", padding="2px 5px")
 
 # ===========================
-# 4. LEGACY ALIASES (سازگاری با کدهای قبلی)
+# 4. LEGACY ALIASES (compatibility with previous codes)
 # ===========================
 
 BTN_NEW_PROJECT = BTN_SUCCESS
@@ -175,79 +175,79 @@ LIST_WIDGET_STYLE = """
         font-size: 13px;
     }
 
-    /* آیتم‌های لیست */
+    /* List items */
     QListWidget::item {
         padding: 8px;
         border-bottom: 1px solid #2d2d2d;
     }
 
-    /* هاور */
+    /* Hover */
     QListWidget::item:hover {
         background-color: #333;
     }
 
-    /* آیتم انتخاب شده */
+    /* Selected item */
     QListWidget::item:selected {
-        background-color: #383838; /* رنگ پس‌زمینه در حالت انتخاب */
+        background-color: #383838; /* Background color in select mode */
         color: white;
         border: 1px solid #007acc;
     }
 
-    /* --- استایل چک‌باکس‌های داخل لیست --- */
+    /* --- The style of the checkboxes in the list --- */
     QListWidget::indicator {
         width: 18px;
         height: 18px;
         background-color: #333;
         border: 1px solid #555;
         border-radius: 4px;
-        margin-right: 10px; /* فاصله چک‌باکس از متن */
+        margin-right: 10px; /* The distance of the checkbox from the text */
     }
 
-    /* وقتی موس روی چک‌باکس می‌رود */
+    /* When the mouse hovers over the checkbox */
     QListWidget::indicator:hover {
         border: 1px solid #007acc;
         background-color: #3a3a3a;
     }
 
-    /* وقتی تیک خورده است */
+    /* When it is ticked */
     QListWidget::indicator:checked {
         background-color: #007acc;
         border: 1px solid #007acc;
-        image: url(../resources/icons/check.svg); /* اگر آیکون ندارید، رنگ آبی کافیست */
+        image: url(../resources/icons/check.svg); /* If you don't have an icon, blue is enough */
     }
 """
 CHECKBOX_STYLE = """
     QCheckBox {
         color: #eee;
-        spacing: 8px; /* فاصله متن از مربع */
+        spacing: 8px; /* Text distance from the square */
         font-size: 13px;
     }
 
-    /* مربع چک‌باکس */
+    /* Checkbox square */
     QCheckBox::indicator {
         width: 18px;
         height: 18px;
         background-color: #333;
         border: 1px solid #555;
-        border-radius: 4px; /* هماهنگ با LineEdit */
+        border-radius: 4px; /* Compatible with LineEdit */
     }
 
-    /* وقتی موس روی آن می‌رود */
+    /* When the mouse hovers over it */
     QCheckBox::indicator:hover {
         border: 1px solid #007acc;
         background-color: #3a3a3a;
     }
 
-    /* حالت تیک خورده */
+    /* Checked state */
     QCheckBox::indicator:checked {
         background-color: #007acc;
         border: 1px solid #007acc;
-        /* می‌توانید یک آیکون تیک هم اینجا اضافه کنید، 
-           اما تغییر رنگ به آبی نشان‌دهنده انتخاب است */
-        image: url(../resources/icons/check.svg); /* اگر آیکون دارید */
+        /* You can also add a tick icon here,
+           But changing color to blue indicates selection */
+        image: url(../resources/icons/check.svg); /* If you have an icon */
     }
     
-    /* حالت غیرفعال */
+    /* Inactive mode */
     QCheckBox::indicator:disabled {
         background-color: #2a2a2a;
         border: 1px solid #444;
@@ -261,58 +261,58 @@ RADIOBUTTON_STYLE = """
         font-size: 13px;
     }
 
-    /* دایره رادیو */
+    /* Radio circle */
     QRadioButton::indicator {
         width: 18px;
         height: 18px;
         background-color: #333;
         border: 1px solid #555;
-        border-radius: 10px; /* شعاع ۵۰ درصد برای دایره کامل */
+        border-radius: 10px; /* 50% radius for full circle */
     }
 
-    /* هاور */
+    /* Hover */
     QRadioButton::indicator:hover {
         border: 1px solid #007acc;
         background-color: #3a3a3a;
     }
 
-    /* حالت انتخاب شده */
+    /* selected mode */
     QRadioButton::indicator:checked {
         background-color: #007acc; 
-        border: 4px solid #333; /* تکنیک ایجاد نقطه وسط با بردر */
+        border: 4px solid #333; /* The technique of creating a middle point with a border */
     }
 """
 
 LIST_WIDGET_STYLE = """
     QListWidget {
-        background-color: #252525; /* هماهنگ با پس‌زمینه لیست کمبوباکس */
+        background-color: #252525; /* Compatible with combobox list background */
         border: 1px solid #555;
         border-radius: 4px;
         color: #eee;
-        outline: none; /* حذف خط چین دور آیتم انتخاب شده */
+        outline: none; /* Remove the dash around the selected item */
         font-size: 13px;
     }
 
-    /* آیتم‌های لیست */
+    /* List items */
     QListWidget::item {
-        padding: 8px; /* فضای تنفس مناسب */
-        border-bottom: 1px solid #2d2d2d; /* خط جداکننده محو */
+        padding: 8px; /* Adequate breathing space */
+        border-bottom: 1px solid #2d2d2d; /* Blurred dividing line */
     }
 
-    /* هاور روی آیتم (وقتی انتخاب نشده) */
+    /* Hover over item (when not selected) */
     QListWidget::item:hover:!selected {
         background-color: #333;
     }
 
-    /* آیتم انتخاب شده */
+    /* Selected item */
     QListWidget::item:selected {
         background-color: #007acc;
         color: white;
         border: none;
-        border-radius: 3px; /* کمی گردی برای آیتم انتخاب شده */
+        border-radius: 3px; /* A little roundness for the selected item */
     }
     
-    /* اسکرول بار (اختیاری - برای زیبایی بیشتر) */
+    /* Scroll bar (optional - for more beauty) */
     QListWidget QScrollBar:vertical {
         background: #252525;
         width: 8px;
@@ -346,7 +346,7 @@ SPINBOX_STYLE = """
         border-left: 1px solid #555;
     }
 
-    /* آدرس‌دهی فلش‌های بالا و پایین */
+    /* Addressing up and down arrows */
     QSpinBox::up-arrow {
         image: url(resource/icons/arrow-up.svg);
         width: 12px;
@@ -378,7 +378,7 @@ COMBOBOX_STYLE = """
         background-color: #444; 
     }
 
-    /* آدرس‌دهی مستقیم از ریشه پروژه */
+    /* Addressing directly from the root of the project */
     QComboBox::down-arrow {
         image: url(resource/icons/arrow-down.svg);
         width: 14px;
@@ -475,7 +475,7 @@ LOGIN_BG_FRAME = "QFrame { background-color: #1e1e1e; border-radius: 15px; borde
 LOGIN_CLOSE_BTN = "QPushButton { color: #666; background: transparent; border: none; font-size: 16px; } QPushButton:hover { color: #ff5555; }"
 LOGIN_TITLE = "font-size: 28px; font-weight: bold; color: #007acc; letter-spacing: 2px;"
 LOGIN_SUBTITLE = "font-size: 12px; color: #888; margin-bottom: 20px;"
-LOGIN_INPUT = INPUT_STYLE # استفاده از همان استایل ورودی استاندارد
+LOGIN_INPUT = INPUT_STYLE # Use the same standard input style
 LOGIN_INPUT_ERROR = """
     QLineEdit {
         background-color: #2b2b2b; border: 1px solid #ff5555; border-radius: 8px;
@@ -526,7 +526,7 @@ DIALOG_THEME = """
         color: #ccc;
         margin-top: 8px;
     }
-    /* استفاده از استایل اینپوت‌های موجود */
+    /* Using existing input styles */
     QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox {
         background-color: #333;
         border: 1px solid #555;
@@ -539,7 +539,7 @@ DIALOG_THEME = """
         border: 1px solid #007acc;
         background-color: #2a2a2a;
     }
-    /* کمبوباکس */
+    /* combo box */
     QComboBox {
         background-color: #333;
         color: white;
@@ -556,21 +556,21 @@ DIALOG_THEME = """
     }
 """
 DIALOG_STYLESHEET = """
-    /* 1. پس‌زمینه اصلی پنجره */
+    /* 1. Main window background */
     QDialog {
         background-color: #252525;
         color: #ffffff;
         font-family: 'Segoe UI', sans-serif;
     }
 
-    /* 2. متن‌ها و لیبل‌ها */
+    /* 2. Texts and labels */
     QLabel {
         font-size: 14px;
         color: #cccccc;
         font-weight: normal;
         margin-bottom: 2px;
     }
-    /* لیبل‌های مهم (مثل تیترها) را بولد می‌کنیم */
+    /* We bold the important labels (like headlines). */
     QLabel[class="Header"] {
         font-size: 16px;
         font-weight: bold;
@@ -578,24 +578,24 @@ DIALOG_STYLESHEET = """
         margin-bottom: 10px;
     }
 
-    /* 3. تمام ورودی‌ها (متن، عدد، لیست کشویی) */
+    /* 3. All inputs (text, number, drop-down list) */
     QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QComboBox {
         background-color: #333333;
         border: 1px solid #505050;
         border-radius: 4px;
-        padding: 6px; # فضای داخلی بیشتر برای زیبایی
+        padding: 6px; # More interior space for beauty
         color: #ffffff;
         font-size: 13px;
         selection-background-color: #007acc;
     }
 
-    /* حالت فوکوس (وقتی روی اینپوت کلیک می‌شود) */
+    /* Focus mode (when input is clicked) */
     QLineEdit:focus, QTextEdit:focus, QSpinBox:focus, QComboBox:focus {
-        border: 1px solid #007acc; /* دورش آبی شود */
+        border: 1px solid #007acc; /* It will turn blue */
         background-color: #2a2a2a;
     }
 
-    /* تنظیمات خاص کمبو باکس */
+    /* Special combo box settings */
     QComboBox::drop-down {
         border: none;
         background: transparent;
@@ -608,7 +608,7 @@ DIALOG_STYLESHEET = """
         selection-background-color: #007acc;
     }
 
-    /* 4. لیست‌ها (مثل لیست ممبرها) */
+    /* 4. Lists (such as the list of members) */
     QListWidget {
         background-color: #333333;
         border: 1px solid #505050;
@@ -627,7 +627,7 @@ DIALOG_STYLESHEET = """
         border-radius: 3px;
     }
 
-    /* 5. دکمه Browse (...) */
+    /* 5. Browse (...) button */
     QPushButton[class="Browse"] {
         background-color: #444;
         border: 1px solid #555;
@@ -640,7 +640,7 @@ DIALOG_STYLESHEET = """
         border-color: #777;
     }
 """
-# دکمه مرور فایل (Browse)
+# File browsing button (Browse)
 BTN_BROWSE = """
     QPushButton {
         background-color: #444;
@@ -655,11 +655,11 @@ BTN_BROWSE = """
     }
 """
 
-# --- دکمه (+) ---
+# --- (+) button ---
 
 BTN_ADD_SMALL = _get_btn_style(COLOR_GREEN, COLOR_GREEN_HOVER, font_size="16px", padding="2px")
 
-# --- OK و Cancel ---
+# --- OK and Cancel ---
 
 DIALOG_BUTTON_STYLE = f"""
     QPushButton {{ 
@@ -667,13 +667,13 @@ DIALOG_BUTTON_STYLE = f"""
         padding: 6px 12px; 
         border-radius: 4px; 
         font-weight: bold; 
-        background-color: {COLOR_GRAY}; /* پیش‌فرض خاکستری */
+        background-color: {COLOR_GRAY}; /* Default gray */
         color: white;
     }}
     QPushButton:hover {{
         background-color: {COLOR_GRAY_HOVER};
     }}
-    /* شناسایی دکمه‌های تایید (OK/Save/Yes) و سبز کردن آن‌ها */
+    /* Identifying the confirmation buttons (OK/Save/Yes) and turning them green */
     QPushButton[text="OK"], QPushButton[text="&OK"], QPushButton[text="Save"], QPushButton[text="Yes"] {{
         background-color: {COLOR_GREEN};
     }}
@@ -689,7 +689,7 @@ MENU_STYLE = """
         padding: 5px;
     }
     QMenu::item {
-        padding: 8px 25px 8px 25px; /* فضا برای آیکون و متن */
+        padding: 8px 25px 8px 25px; /* Space for icons and text */
         border-radius: 3px;
     }
     QMenu::item:selected {
@@ -708,12 +708,12 @@ MENU_STYLE = """
 # ------------------
 # ICONS
 #-------------------
-# مسیر ثابت فولدر آیکون‌های نرم‌افزار
+# Fixed path of software icons folder
 SOFTWARE_ICON_DIR = os.path.join(PROJECT_ROOT, "resource", "icons", "software")
 
 def get_sw_icon(software_name):
     """
-    گرفتن مسیر کامل فایل PNG برای هر نرم‌افزار
+    Get the full path of the PNG file for each software
     """
     icon_path = os.path.join(SOFTWARE_ICON_DIR, f"{software_name.lower()}.png")
     if os.path.exists(icon_path):
@@ -721,7 +721,7 @@ def get_sw_icon(software_name):
     return None
 
 def get_engine_icon(engine_name):
-    """گرفتن مسیر آیکون موتور رندر"""
+    """Getting the render engine icon path"""
     if not engine_name or engine_name == "--------": return None
     icon_path = os.path.join(PROJECT_ROOT, "resource", "icons", "engines", f"{engine_name.lower()}.png")
     return icon_path if os.path.exists(icon_path) else None

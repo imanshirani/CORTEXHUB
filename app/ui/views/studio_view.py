@@ -35,21 +35,21 @@ class StudioView(QWidget):
 
         # --- Table Initialization (FIXED for 5 Columns) ---
         self.table = QTableWidget()
-        self.table.setColumnCount(5) # تعداد ستون‌ها با load_depts هماهنگ شد
+        self.table.setColumnCount(5) # Column count matches load_depts
         self.table.setHorizontalHeaderLabels(["Department Name", "Software", "Engine", "Color Preview", "Actions"])
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         
         header = self.table.horizontalHeader()
         
-        # تنظیم نحوه تغییر سایز ستون‌ها
-        header.setSectionResizeMode(0, QHeaderView.Stretch)           # نام دپارتمان کش می‌آید
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # آیکون‌های نرم‌افزار
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # آیکون انجین
+        # How columns resize
+        header.setSectionResizeMode(0, QHeaderView.Stretch)           # Department name stretches
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Software icons
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Engine icon
         
-        header.setSectionResizeMode(3, QHeaderView.Fixed)            # پیش‌نمایش رنگ
+        header.setSectionResizeMode(3, QHeaderView.Fixed)            # Color preview
         self.table.setColumnWidth(3, 150)
         
-        header.setSectionResizeMode(4, QHeaderView.Fixed)            # دکمه‌های عملیات
+        header.setSectionResizeMode(4, QHeaderView.Fixed)            # Action buttons
         self.table.setColumnWidth(4, 180)
         
         self.table.verticalHeader().setDefaultSectionSize(50)
@@ -60,20 +60,20 @@ class StudioView(QWidget):
         self.load_depts()
 
     def create_color_widget(self, text, color_code):
-        """تابع کمکی برای ساخت ویجت شامل مربع رنگی و متن"""
+        """Helper that builds a widget with a color square and a label"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(10, 0, 10, 0) # مارجین چپ و راست
+        layout.setContentsMargins(10, 0, 10, 0) # Left/right margin
         layout.setSpacing(10)
         
-        # 1. مربع رنگی
+        # 1. Color square
         color_box = QLabel()
         color_box.setFixedSize(20, 20)
-        # اگر دیتابیس رنگ نداد (None)، پیش‌فرض طوسی بذار
+        # If the database has no color (None), default to gray
         safe_color = color_code if color_code else "#555"
         color_box.setStyleSheet(f"background-color: {safe_color}; border: 1px solid #777; border-radius: 4px;")
         
-        # 2. متن (کد رنگ)
+        # 2. Text (color code)
         label = QLabel(text if text else "N/A")
         label.setStyleSheet("color: #ccc; background: transparent; font-family: monospace;")
         
@@ -88,17 +88,17 @@ class StudioView(QWidget):
         Handle Load Depts operation.
         """
         self.table.setRowCount(0)
-        # اضافه کردن ستون‌های جدید به هدر در صورت نیاز (تعداد ستون را در __init__ به 5 تغییر بده)
+        # Add extra header columns if needed (set column count to 5 in __init__)
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Department Name", "Software", "Engine", "Color", "Actions"])
         
         rows = self.session.db.get_all_departments()
         
         for row_idx, row in enumerate(rows):
-            # دریافت ۵ مقدار: id, name, color, sw, engine
+            # Five values: id, name, color, sw, engine
             dept_id, name, color, sw, engine = row 
             
-            # ساخت آبجکت کامل (بدون بازنویسی اشتباه!)
+            # Build the full object (do not overwrite it incorrectly)
             dept_obj = {
                 "id": dept_id, 
                 "name": name, 
@@ -110,30 +110,30 @@ class StudioView(QWidget):
             self.table.insertRow(row_idx)
             self.table.setItem(row_idx, 0, QTableWidgetItem(name))
 
-            # --- ستون Software Icons (مشابه داشبورد) ---
+            # --- Software Icons column (same as dashboard) ---
             sw_widget = QWidget()
             sw_layout = QHBoxLayout(sw_widget)
             sw_layout.setContentsMargins(5, 0, 5, 0)
             
-            # --- تغییر اصلی: خواندن لیست داینامیک از دیتابیس ---
+            # --- Main change: read a dynamic list from the database ---
             all_softwares = self.session.db.get_software_list()
             
             for s in all_softwares:
-                s_clean = s.lower().strip() # تمیز کردن نام برای جلوگیری از ارور فاصله یا حروف بزرگ
-                # چک کردن اجازه دسترسی بر اساس دپارتمان
+                s_clean = s.lower().strip() # Normalize name so spaces/case do not break matching
+                # Check department permission
                 if sw.lower() == "all" or s_clean in sw.lower():
                     icon_path = style.get_sw_icon(s_clean)
                     if icon_path:
                         lbl = QLabel()
-                        # استفاده از QPixmap برای نمایش آیکون
+                        # Use QPixmap for the icon
                         lbl.setPixmap(QPixmap(icon_path).scaled(18, 18, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-                        lbl.setToolTip(s.strip().capitalize()) # نمایش نام با نگه داشتن موس
+                        lbl.setToolTip(s.strip().capitalize()) # Show the name on hover
                         sw_layout.addWidget(lbl)
                         
             sw_layout.addStretch()
             self.table.setCellWidget(row_idx, 1, sw_widget)
 
-            # --- ستون Engine Icon ---
+            # --- Engine Icon column ---
             eng_widget = QWidget()
             eng_layout = QHBoxLayout(eng_widget)
             eng_layout.setContentsMargins(5, 0, 5, 0)
@@ -146,7 +146,7 @@ class StudioView(QWidget):
             eng_layout.addStretch()
             self.table.setCellWidget(row_idx, 2, eng_widget)
 
-            # ستون رنگ و دکمه‌ها (ایندکس ۳ و ۴)
+            # Color and action columns (indexes 3 and 4)
             self.table.setCellWidget(row_idx, 3, self.create_color_widget(color, color))
 
             actions_widget = QWidget()
@@ -155,7 +155,7 @@ class StudioView(QWidget):
             
             btn_edit = QPushButton("Edit")
             btn_edit.setStyleSheet(style.BTN_SM_EDIT)
-            # حالا dept_obj کامل به دیالوگ پاس داده می‌شود
+            # The full dept_obj is now passed to the dialog
             btn_edit.clicked.connect(lambda _, d=dept_obj: self.open_edit_dialog(d))
             
             btn_del = QPushButton("Del")

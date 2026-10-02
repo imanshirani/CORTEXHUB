@@ -3,7 +3,7 @@ import os
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QLineEdit, 
                                QPushButton, QHBoxLayout, QComboBox, QMessageBox, QTextEdit, QCheckBox)
 from PySide6.QtCore import Qt
-from app.ui import style # استفاده از استایل‌های مرکزی کورتکس
+from app.ui import style # Using Cortex central styles
 
 class RuleDialog(QDialog):
     def __init__(self, session, project_id=None, rule_to_edit=None, parent=None):
@@ -16,10 +16,10 @@ class RuleDialog(QDialog):
         self.project_id = project_id
         self.rule_to_edit = rule_to_edit
         
-        # تنظیم عنوان بر اساس حالت ویرایش یا افزودن
+        # Set title based on edit or add mode
         self.setWindowTitle("Edit Validation Rule" if rule_to_edit else "Add New Validation Rule")
         self.resize(700, 750)
-        self.setStyleSheet(style.DARK_THEME) # اعمال تم اصلی
+        self.setStyleSheet(style.DARK_THEME) # Actions you are real
         
         self.setup_ui()
         
@@ -34,37 +34,37 @@ class RuleDialog(QDialog):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
 
-        # --- انتخاب پروژه ---
+        # --- Project selection ---
         layout.addWidget(QLabel("Associated Project:"))
         self.project_combo = QComboBox()
-        self.project_combo.setStyleSheet(style.COMBOBOX_STYLE) # استایل کمبوباکس کورتکس
+        self.project_combo.setStyleSheet(style.COMBOBOX_STYLE) # Cortex combo box style
         self.load_projects()
         layout.addWidget(self.project_combo)
 
-        # --- نام قانون ---
+        # --- The name of the law ---
         layout.addWidget(QLabel("Rule Name (Key):"))
         self.name_input = QLineEdit()
-        self.name_input.setStyleSheet(style.INPUT_STYLE) # استایل ورودی متن
+        self.name_input.setStyleSheet(style.INPUT_STYLE) # Text input style
         self.name_input.setPlaceholderText("e.g. check_missing_textures")
         layout.addWidget(self.name_input)
 
-        # --- انتخاب نرم‌افزار ---
+        # --- Software selection ---
         layout.addWidget(QLabel("Target Software:"))
         self.soft_combo = QComboBox()
         self.soft_combo.setStyleSheet(style.COMBOBOX_STYLE) #
         self.soft_combo.addItems(["all", "max", "blender", "maya"])
         layout.addWidget(self.soft_combo)
 
-        # --- وضعیت اجباری بودن ---
+        # --- Mandatory status ---
         self.check_mandatory = QCheckBox("Mandatory (Stops Publish on Error)")
-        self.check_mandatory.setStyleSheet(style.CHECKBOX_STYLE) # استایل چک‌باکس
+        self.check_mandatory.setStyleSheet(style.CHECKBOX_STYLE) # Checkbox style
         self.check_mandatory.setChecked(True)
         layout.addWidget(self.check_mandatory)
 
-        # --- اسکریپت پایتون ---
+        # --- Python script ---
         layout.addWidget(QLabel("Python Logic Script:"))
         self.script_input = QTextEdit()
-        # استایل اختصاصی برای ادیتور کد
+        # Exclusive style for the code editor
         self.script_input.setStyleSheet("""
             QTextEdit {
                 background-color: #1a1a1a;
@@ -79,18 +79,18 @@ class RuleDialog(QDialog):
         self.script_input.setPlaceholderText("# Access to: self (publisher), is_mandatory, errors (list), warnings (list)")
         layout.addWidget(self.script_input)
 
-        # --- دکمه‌های عملیاتی ---
+        # --- Operation buttons ---
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
         
         self.btn_save = QPushButton("Save Rule")
-        self.btn_save.setStyleSheet(style.BTN_SUCCESS) # دکمه سبز
+        self.btn_save.setStyleSheet(style.BTN_SUCCESS) # Green button
         self.btn_save.setFixedHeight(35)
         self.btn_save.setCursor(Qt.PointingHandCursor)
         self.btn_save.clicked.connect(self.save_rule)
         
         self.btn_cancel = QPushButton("Cancel")
-        self.btn_cancel.setStyleSheet(style.BTN_SECONDARY) # دکمه خاکستری
+        self.btn_cancel.setStyleSheet(style.BTN_SECONDARY) # Gray button
         self.btn_cancel.setFixedHeight(35)
         self.btn_cancel.setCursor(Qt.PointingHandCursor)
         self.btn_cancel.clicked.connect(self.reject)
@@ -100,7 +100,7 @@ class RuleDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def load_projects(self):
-        """دریافت لیست پروژه‌ها از دیتابیس"""
+        """Get the list of projects from the database"""
         self.project_combo.clear()
         projects = self.db.get_all_projects()
         for proj in projects:
@@ -111,14 +111,14 @@ class RuleDialog(QDialog):
             if index >= 0: self.project_combo.setCurrentIndex(index)
 
     def load_data(self):
-        """لود کردن اطلاعات قانون برای ویرایش"""
+        """Load rule information for editing"""
         self.name_input.setText(self.rule_to_edit.get('rule_key', ''))
         self.soft_combo.setCurrentText(self.rule_to_edit.get('software', 'all'))
         self.script_input.setPlainText(self.rule_to_edit.get('rule_script', ''))
         self.check_mandatory.setChecked(bool(self.rule_to_edit.get('is_mandatory', 1)))
 
     def save_rule(self):
-        """جمع‌آوری داده‌ها و ارسال به دیتابیس"""
+        """Data collection and sending to the database"""
         selected_project_id = self.project_combo.currentData()
         name = self.name_input.text().strip()
         script = self.script_input.toPlainText().strip()
@@ -135,7 +135,7 @@ class RuleDialog(QDialog):
             "is_mandatory": 1 if self.check_mandatory.isChecked() else 0
         }
         
-        # فراخوانی متدهای جدید در دیتابیس
+        # Calling new methods in the database
         if self.rule_to_edit:
             success = self.db.update_validation_rule(self.rule_to_edit['id'], rule_data)
         else:
@@ -144,5 +144,5 @@ class RuleDialog(QDialog):
         if success:
             self.accept()
         else:
-            # نمایش دقیق خطا در صورت عدم ثبت
+            # Detailed error display if not registered
             QMessageBox.critical(self, "Database Error", "Failed to save rule in Database.\nCheck console for SQL errors.")

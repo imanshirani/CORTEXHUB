@@ -8,7 +8,7 @@ WEBSITE = "CORTEX"
 GITHUB = "https://github.com/ImanShirani/Cortex-HUB"
 PAYPAL = "https://paypal.me/ImanShirani"
 
-# رنگ‌های ثابت (که تغییر نمی‌کنند)
+# Fixed colors (that don't change)
 COLOR_PRIMARY = "#007acc"
 COLOR_ERROR = "#ff5555"
 
@@ -24,7 +24,7 @@ RENDER_ENGINES = ["--------", "V-Ray", "Octane", "Cycles", "Arnold", "Redshift"]
 # 'sqlite' or 'postgres'
 DB_TYPE = "sqlite" 
 
-# If DB_TYPE is 'postgres', this is the configuration for PostgreSQL (اگر ادمین خواست از سرور استفاده کند)
+# If DB_TYPE is 'postgres', this is the configuration for PostgreSQL (if the admin wants to use the server)
 DB_CONFIG = {
     "host": "localhost",
     "database": "cortex_db",

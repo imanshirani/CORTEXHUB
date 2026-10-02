@@ -18,7 +18,7 @@ class PublishDialog(QDialog):
         
         self.output_config = output_config or [] 
         
-        # 1. دریافت اطلاعات کانتکست
+        # 1. Get context information
         self.context = self.session.db.get_task_context_data(task_id)
         
         # --- SAFETY CHECK ---
@@ -61,7 +61,7 @@ class PublishDialog(QDialog):
         self.lbl_thumb.setFixedSize(220, 140)
         self.lbl_thumb.setStyleSheet("background-color: #222; border: 2px dashed #555;")
         self.lbl_thumb.setAlignment(Qt.AlignCenter)
-        self.lbl_thumb.setScaledContents(True) # فیت کردن عکس
+        self.lbl_thumb.setScaledContents(True) # Photo fitting
         header_layout.addWidget(self.lbl_thumb)
         
         info_layout = QVBoxLayout()
@@ -79,16 +79,16 @@ class PublishDialog(QDialog):
         v_out = QVBoxLayout(group_out)
         self.checks = {}
 
-        # اینجا دیگر هیچ شرط ایف و السی نداریم!
-        # فقط روی لیستی که تحویل گرفتیم لوپ می‌زنیم
+        # We don't have any IF and ELS conditions here!
+        # We only loop on the list we received
         for item in self.output_config:
-            # item مثال: {'key': 'source', 'label': 'Max File', 'checked': True, 'enabled': False}
+            # item example: {'key': 'source', 'label': 'Max File', 'checked': True, 'enabled': False}
             chk = QCheckBox(item['label'])
             chk.setChecked(item.get('checked', True))
             chk.setEnabled(item.get('enabled', True))
             v_out.addWidget(chk)
             
-            # ذخیره با کلید مشخص (مثلاً 'source' یا 'alembic')
+            # Save with specified key (eg 'source' or 'alembic')
             self.checks[item['key']] = chk
 
         layout.addWidget(group_out)
@@ -117,7 +117,7 @@ class PublishDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def load_thumbnail(self):
-        """لود کردن عکس از مسیری که مکس فرستاده"""
+        """Loading the photo from the route sent by Max"""
         if self.thumbnail_path and os.path.exists(self.thumbnail_path):
             pix = QPixmap(self.thumbnail_path)
             self.lbl_thumb.setPixmap(pix)

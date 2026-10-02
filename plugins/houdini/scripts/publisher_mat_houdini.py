@@ -13,7 +13,7 @@ except:
 from app.core.database import DatabaseManager
 
 def run_lookdev_publish():
-    """ذخیره و پابلیش کتابخانه متریال از نود /mat با ساختار تسک"""
+    """Save and publish a material library from /mat with the task layout"""
     db = DatabaseManager()
     task_id = os.environ.get("CORTEX_TASK_ID")
     task_name = os.environ.get("CORTEX_TASK_NAME", "out").replace(" ", "_")
@@ -22,13 +22,13 @@ def run_lookdev_publish():
         hou.ui.displayMessage("Error: Please launch Houdini via Cortex HUB!")
         return
 
-    # ۱. گرفتن مسیر پایه متریال از دیتابیس (publish/3d/lookdev)
+    # 1. Base material path from the database (publish/3d/lookdev)
     mat_pub_dir = db.get_publish_path(task_id, software="lookdev", category="3d")
     if not mat_pub_dir:
         hou.ui.displayMessage("Error: Could not resolve lookdev path from DB.")
         return
 
-    # ۲. اضافه کردن زیرپوشه تسک (مثلاً BODY یا HEAD)
+    # 2. Task subfolder (e.g. BODY or HEAD)
     mat_pub_dir = os.path.join(mat_pub_dir, task_name).replace("\\", "/")
     
     if not os.path.exists(mat_pub_dir):

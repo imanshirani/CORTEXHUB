@@ -26,7 +26,7 @@ class ValidationView(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(20)
         
-        # --- بخش انتخاب پروژه (برای نمایش صحیح داده‌ها) ---
+        # --- Project picker (so the table shows the right data) ---
         selector_layout = QHBoxLayout()
         selector_layout.addWidget(QLabel("Filter by Project:"))
         
@@ -73,23 +73,23 @@ class ValidationView(QWidget):
         
         layout.addWidget(self.table)
         
-        # لود اولیه جدول بر اساس اولین پروژه
+        # Initial table load from the first project
         self.on_project_filter_changed()
 
     def load_projects_list(self):
-        """پر کردن لیست پروژه‌ها در منوی بالا"""
+        """Fill the project list in the top menu"""
         self.project_combo.clear()
         projects = self.db.get_all_projects()
         for proj in projects:
             self.project_combo.addItem(proj.name, proj.id)
         
-        # اگر از قبل آیدی داشتیم، آن را انتخاب کن
+        # If we already had an id, re-select it
         if self.project_id:
             idx = self.project_combo.findData(self.project_id)
             if idx >= 0: self.project_combo.setCurrentIndex(idx)
 
     def on_project_filter_changed(self):
-        """وقتی پروژه را از منوی بالا عوض می‌کنیم"""
+        """When the project is changed from the top menu"""
         self.project_id = self.project_combo.currentData()
         self.refresh_table()
 
@@ -101,28 +101,28 @@ class ValidationView(QWidget):
         if not self.project_id:
             return
             
-        # فراخوانی متد دیتابیس که اسکریپت‌ها را هم می‌آورد
+        # Call the database method that also returns scripts
         rules = self.db.get_all_validation_rules_extended(self.project_id)
         
         for row_idx, rule in enumerate(rules):
-            # ساختار rule: (id, software, rule_key, is_active, is_mandatory, rule_script)
+            # rule tuple: (id, software, rule_key, is_active, is_mandatory, rule_script)
             self.table.insertRow(row_idx)
             
-            # 1. نام قانون
+            # 1. Rule name
             self.table.setItem(row_idx, 0, QTableWidgetItem(str(rule[2])))
             
-            # 2. نرم‌افزار
+            # 2. Software
             soft_item = QTableWidgetItem(str(rule[1]).upper())
             soft_item.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row_idx, 1, soft_item)
             
-            # 3. اجباری بودن
+            # 3. Mandatory
             status_text = "YES" if rule[4] else "NO"
             status_item = QTableWidgetItem(status_text)
             status_item.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row_idx, 2, status_item)
 
-            # 4. دکمه‌های عملیاتی
+            # 4. Action buttons
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
             actions_layout.setContentsMargins(5, 2, 5, 2)
@@ -148,21 +148,21 @@ class ValidationView(QWidget):
         """
         dialog = RuleDialog(self.session, self.project_id, parent=self)
         if dialog.exec():
-            # رفرش کردن لیست بلافاصله پس از تایید دیالوگ
+            # Refresh the list immediately after the dialog is accepted
             self.refresh_table()
 
     def open_edit_rule_dialog(self, rule_data):
         """
         Handle Open Edit Rule Dialog operation.
         """
-        # مپ کردن داده‌ها برای دیالوگ
+        # Map data for the dialog
         rule_dict = {
             "id": rule_data[0], "software": rule_data[1], "rule_key": rule_data[2], 
             "is_mandatory": rule_data[4], "rule_script": rule_data[5], "project_id": self.project_id
         }
         dialog = RuleDialog(self.session, self.project_id, rule_to_edit=rule_dict, parent=self)
         if dialog.exec():
-            # رفرش کردن لیست بلافاصله پس از ویرایش
+            # Refresh the list immediately after edit
             self.refresh_table()
 
     def on_delete_rule(self, rule_id):

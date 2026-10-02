@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QPushButton, QLabel, QMessag
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
-# اضافه کردن مسیر استایل
+# Import shared stylesheet
 import style
 
 class SaveWindow(QDialog):
@@ -12,9 +12,9 @@ class SaveWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Cortex | Save New Version")
         self.setFixedSize(400, 300)
-        self.setStyleSheet(style.SAVEWINDOW) # استفاده از استایل استاندارد شما
+        self.setStyleSheet(style.SAVEWINDOW) # shared save-window stylesheet
         
-        # دریافت مسیرها از محیط (ست شده توسط Launcher)
+        # Paths from environment (set by the launcher)
         self.work_path = os.environ.get("CORTEX_WORK_PATH")
         self.task_filename = os.environ.get("CORTEX_TASK_NAME", "Asset")
         
@@ -23,12 +23,12 @@ class SaveWindow(QDialog):
         self.capture_psd_preview()
 
     def capture_psd_preview(self):
-        """گرفتن یک شات سریع از سند باز فتوشاپ برای نمایش در پنجره سیو"""
+        """Grab a quick shot of the open Photoshop document for the save dialog."""
         try:
             import photoshop.api as ps
             app = ps.Application()
             if app.documents.length > 0:
-                # ذخیره یک جی‌پی‌جی موقت برای نمایش در این پنجره
+                # Temp JPEG used only as a thumbnail in this window
                 temp_thumb = os.path.join(os.environ["TEMP"], "ps_cortex_temp.jpg")
                 options = ps.JPEGSaveOptions(quality=5)
                 app.activeDocument.saveAs(temp_thumb, options, True)
@@ -39,7 +39,7 @@ class SaveWindow(QDialog):
             self.lbl_thumbnail.setText("Could not capture Photoshop preview")
 
     def get_next_version(self):
-        """یافتن شماره ورژن بعدی بر اساس فایل‌های موجود در پوشه ورک"""
+        """Find the next version number from PSD files already in the work folder."""
         if not os.path.exists(self.work_path):
             return 1
         
@@ -47,7 +47,7 @@ class SaveWindow(QDialog):
         versions = []
         for f in files:
             try:
-                # جدا کردن شماره ورژن (مثلاً Asset_v002.psd)
+                # Parse version number (e.g. Asset_v002.psd)
                 ver_part = f.split("_v")[-1].split(".")[0]
                 versions.append(int(ver_part))
             except: pass
@@ -57,26 +57,26 @@ class SaveWindow(QDialog):
     def init_ui(self):
         layout = QVBoxLayout(self)
         
-        # نمایش ورژن جدید
+        # Show the next version
         self.lbl_info = QLabel(f"Saving New Version: v{self.next_version:03d}")
-        self.lbl_info.setObjectName("VersionLabel") # برای استایل دهی
+        self.lbl_info.setObjectName("VersionLabel") # stylesheet target
         self.lbl_info.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.lbl_info)
 
-        # پیش‌نمایش (Placeholder)
+        # Preview placeholder
         self.lbl_thumbnail = QLabel("Thumbnail will be captured on save")
         self.lbl_thumbnail.setFixedSize(380, 180)
         self.lbl_thumbnail.setStyleSheet(style.LBL_THUMBNAIL)
         self.lbl_thumbnail.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.lbl_thumbnail)
 
-        # دکمه ذخیره
+        # Save button
         self.btn_save = QPushButton(f"💾 SAVE v{self.next_version:03d}")
         self.btn_save.clicked.connect(self.do_save)
         layout.addWidget(self.btn_save)
 
     def do_save(self):
-        """اجرای عملیات ذخیره در فتوشاپ"""
+        """Save the current Photoshop document as a new version."""
         base_name = f"{self.task_filename}_v{self.next_version:03d}"
         full_psd_path = os.path.join(self.work_path, f"{base_name}.psd").replace("\\", "/")
         
@@ -99,7 +99,7 @@ class SaveWindow(QDialog):
                 
                 print(f">> [Cortex] Saved: {full_psd_path}")
                 
-                # رفرش کردن لیست در تولبار بدون لود مجدد کل UI
+                # Refresh the toolbar version list without rebuilding the whole UI
                 try:
                     import cortex_ui
                     if hasattr(cortex_ui, 'cortex_ps_bar') and cortex_ui.cortex_ps_bar:
@@ -107,7 +107,7 @@ class SaveWindow(QDialog):
                 except:
                     pass
 
-                # اول پیام موفقیت را نشان بده، بعد پنجره سیو را ببند
+                # Show success, then close the save window
                 QMessageBox.information(self, "Success", f"Saved Version {self.next_version:03d}")
                 self.accept()
         except Exception as e:

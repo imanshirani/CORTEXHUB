@@ -4,16 +4,16 @@ import os
 import sys
 
 # =========================================================
-# 1. PATH FIX (باید حتما در خط اول باشد)
+# 1. PATH FIX (must stay on the first lines)
 # =========================================================
 try:
-    # مسیر همین فایل (plugins/blender)
+    # Directory of this file (plugins/blender)
     current_folder = os.path.dirname(os.path.abspath(__file__))
     
-    # مسیر ریشه پروژه (دو مرحله عقب‌تر: plugins -> Cortex_Pipeline)
+    # Project root (two levels up: plugins -> Cortex_Pipeline)
     root_folder = os.path.dirname(os.path.dirname(current_folder))
     
-    # اضافه کردن به sys.path اگر نبود
+    # Add to sys.path if missing
     if root_folder not in sys.path:
         sys.path.append(root_folder)
         
@@ -24,13 +24,13 @@ except Exception as e:
     print(f"!! Path Setup Error: {e}")
 
 # =========================================================
-# 2. IMPORTS (بعد از فیکس کردن مسیر)
+# 2. IMPORTS (after the path fix)
 # =========================================================
 from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QPushButton, 
                                QLabel, QFrame, QToolButton, QComboBox, QApplication, QMessageBox)
 from PySide6.QtCore import Qt, QPoint
 
-# حالا پایتون می‌داند app کجاست
+# Python can now find the app package
 from app.core.database import DatabaseManager
 import style 
 
@@ -82,7 +82,7 @@ class CortexBlenderBar(QMainWindow):
         self.create_version_section()
         self.add_separator()
         
-        # 3. Tools (شامل دکمه هوشمند)
+        # 3. Tools (including the smart button)
         self.create_tools_section()
         
         self.add_close_btn()
@@ -131,28 +131,28 @@ class CortexBlenderBar(QMainWindow):
         # --- SMART PUBLISH BUTTON (Logic matched with Max) ---
         is_lookdev = False
         
-        # تلاش برای تشخیص دپارتمان از روی دیتابیس
+        # Try to detect the department from the database
         if self.task_id:
             try:
                 db = DatabaseManager()
                 t_data = db.get_task_by_id(self.task_id)
-                # t_data[2] نام دپارتمان است (مثل 'Lookdev')
+                # t_data[2] is the department name (e.g. 'Lookdev')
                 if t_data and ("lookdev" in t_data[2].lower() or "texture" in t_data[2].lower()):
                     is_lookdev = True
             except:
                 pass
 
         if is_lookdev:
-            # اگر لوک‌دِو بود: دکمه آبی/فیروزه‌ای
+            # Lookdev: blue/teal button
             btn_pub = QPushButton("💎 Publish Look")
-            # از استایل BTN_CTX_LOOKDEV استفاده می‌کنیم (اگر در استایل تعریف نشده، از PUBLISH استفاده می‌کند)
-            # برای اطمینان از استایل سبز استاندارد استفاده می‌کنم یا اگر استایل لوک‌دو داری آن را بگذار
+            # Use BTN_CTX_LOOKDEV (falls back to PUBLISH if missing)
+            # Use the standard green style, or the lookdev style if you have one
             if hasattr(style, 'BTN_CTX_LOOKDEV'):
                 btn_pub.setStyleSheet(style.BTN_CTX_LOOKDEV)
             else:
                 btn_pub.setStyleSheet(style.BTN_CTX_PUBLISH) 
         else:
-            # حالت عادی: دکمه سبز
+            # Default: green button
             btn_pub = QPushButton("🚀 Publish")
             btn_pub.setStyleSheet(style.BTN_CTX_PUBLISH)
 

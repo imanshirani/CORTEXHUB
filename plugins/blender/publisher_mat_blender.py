@@ -6,22 +6,22 @@ class BlenderMaterialPublisher:
         """
         Handle   Init   operation.
         """
-        # مسیر نهایی: Assets/Hero/publish/lookdev/materials
+        # Final path: Assets/Hero/publish/lookdev/materials
         self.lookdev_dir = os.path.join(publish_path, "materials")
         if not os.path.exists(self.lookdev_dir):
             os.makedirs(self.lookdev_dir)
 
     def publish(self):
-        """ذخیره متریال‌های صحنه بلندر در یک فایل کتابخانه"""
+        """Save Blender scene materials into a library file"""
         print("\n>> [Cortex Lookdev] Publishing Blender Materials...")
 
         filename = "blender_native_materials.blend"
         full_path = os.path.join(self.lookdev_dir, filename)
         
-        # ۱. متریال‌های صحنه را انتخاب می‌کنیم
-        # ۲. از دستور save_as_mainfile با فیلتر کردن دیتاها استفاده می‌کنیم
+        # 1. Select scene materials
+        # 2. save_as_mainfile with a data filter
         try:
-            # ذخیره متریال‌ها به صورت یک فایل کتابخانه برای Link/Append
+            # Save as a library for Link/Append
             bpy.ops.wm.save_as_mainfile(filepath=full_path, copy=True, relative_remap=True)
             print(f">> [Cortex] Blender Material Library Published: {full_path}")
             return full_path

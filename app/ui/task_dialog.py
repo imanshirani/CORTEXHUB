@@ -71,12 +71,12 @@ class TaskDialog(QDialog):
         
         self.start_date = QDateEdit()
         self.start_date.setCalendarPopup(True)
-        self.start_date.setDate(QDate.currentDate()) # تاریخ امروز
+        self.start_date.setDate(QDate.currentDate()) # today's date
         self.start_date.setStyleSheet(style.INPUT_STYLE)
         
         self.due_date = QDateEdit()
         self.due_date.setCalendarPopup(True)
-        self.due_date.setDate(QDate.currentDate().addDays(3)) # پیشفرض 3 روز بعد
+        self.due_date.setDate(QDate.currentDate().addDays(3)) # Default 3 days later
         self.due_date.setStyleSheet(style.INPUT_STYLE)
         
         self.est_hours = QDoubleSpinBox()
@@ -146,7 +146,7 @@ class TaskDialog(QDialog):
             idx = self.user_combo.findData(self.task_to_edit[9])
             if idx >= 0: self.user_combo.setCurrentIndex(idx)
             
-            # لود کردن تاریخ‌ها (ایندکس‌های 10, 11, 12 که در دیتابیس ساختیم)
+            # Loading the dates (indexes 10, 11, 12 that we created in the database)
             if len(self.task_to_edit) > 10 and self.task_to_edit[10]:
                 self.start_date.setDate(QDate.fromString(self.task_to_edit[10], "yyyy-MM-dd"))
             if len(self.task_to_edit) > 11 and self.task_to_edit[11]:

@@ -125,10 +125,10 @@ class MayaLoader(QDialog):
         layout.addWidget(self.table_refs)
 
     def refresh_scene_manager(self):
-        """اسکن صحنه مایا برای پیدا کردن رفرنس‌ها و نودهای المبیک"""
+        """Scan the Maya scene for references and Alembic nodes"""
         self.table_refs.setRowCount(0)
         
-        # بررسی Reference های مایا
+        # Maya references
         refs = cmds.ls(type="reference")
         for ref_node in refs:
             if "sharedReferenceNode" in ref_node or "_UNKNOWN_" in ref_node: continue
@@ -327,7 +327,7 @@ class MayaLoader(QDialog):
         if shot_id:
             linked_assets = self.db.get_shot_assets_extended(shot_id)
             for asset in linked_assets:
-                # اولویت لود در شات: فایل‌های پابلیش شده مایا
+                # Shot load priority: published Maya files
                 maya_root = os.path.join(asset[3], asset[4], "Assets", asset[2], asset[1], "publish", "3d", "maya").replace("\\", "/")
                 
                 has_publishes = False
@@ -423,7 +423,7 @@ class MayaLoader(QDialog):
         safe_dept = dept_name.replace(" ", "")
         safe_task = context['task_title'].replace(" ", "_")
         
-        # مسیر ورک مایا
+        # Maya work path
         path = os.path.join(root, proj, entity_type_dir, context['parent_name'], context['entity_name'], 
                             "Work", "3D", safe_dept, "maya", safe_task).replace("\\", "/")
         
@@ -452,7 +452,7 @@ class MayaLoader(QDialog):
         path = self.get_selected_path()
         if not path: return
         
-        # چک کردن فایل سیو نشده در مایا
+        # Check for an unsaved Maya file
         if cmds.file(q=True, modified=True):
             if QMessageBox.question(self, "Open", "Unsaved changes will be lost. Continue?", QMessageBox.Yes|QMessageBox.No) == QMessageBox.No:
                 return
@@ -473,8 +473,8 @@ class MayaLoader(QDialog):
             except Exception as e: QMessageBox.critical(self, "Error", str(e))
 
 def run():
-    # پیدا کردن پنجره اصلی مایا به عنوان Parent
-    import maya.OpenMayaUI as omui   # <--- کلمه .api از اینجا حذف شد
+    # Find the main Maya window as parent
+    import maya.OpenMayaUI as omui   # <--- .api was removed from this import
     from shiboken6 import wrapInstance
     
     maya_main_window_ptr = omui.MQtUtil.mainWindow()

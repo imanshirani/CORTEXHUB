@@ -42,9 +42,9 @@ class AssetDialog(QDialog):
         # 2. Category
         layout.addWidget(QLabel("Category:"))
         self.category_combo = QComboBox()
-        # دسته‌بندی‌های استاندارد - باید با فولدرهای اصلی پروژه هماهنگ باشد
+        # Standard categories - should be consistent with the main project folders
         self.category_combo.addItems(["Characters", "Props", "Environments", "Vehicles"])
-        self.category_combo.setStyleSheet(style.COMBOBOX_STYLE) # استفاده از استایل کمبوباکس
+        self.category_combo.setStyleSheet(style.COMBOBOX_STYLE) # Using combobox style
         layout.addWidget(self.category_combo)
         
         layout.addStretch()

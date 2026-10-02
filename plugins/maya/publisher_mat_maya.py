@@ -7,7 +7,7 @@ class MaterialPublisher:
         """
         Initializes the Material Publisher for Maya.
         """
-        # دریافت مستقیم مسیری که از پابلیشر اصلی فرستاده شده (بدون فولدر اضافی)
+        # Path sent from the main publisher (no extra folder)
         self.lookdev_dir = publish_path 
         
         if not os.path.exists(self.lookdev_dir):
@@ -20,14 +20,14 @@ class MaterialPublisher:
         active_engine = engine_name if engine_name else "Arnold"
         print(f"\n>> [Cortex Maya Lookdev] Publishing Native Materials for: {active_engine}")
 
-        # نام فایل بر اساس انجین (مثلاً mat_lib_arnold.ma)
+        # Filename from the engine (e.g. mat_lib_arnold.ma)
         filename = f"mat_lib_{active_engine.lower().replace(' ', '_')}.ma"
         full_path = os.path.join(self.lookdev_dir, filename)
 
-        # در مایا ما متریال‌ها را بر اساس Shading Engineها پیدا می‌کنیم
+        # In Maya, materials are found via shading engines
         all_shading_groups = cmds.ls(type='shadingEngine')
         
-        # حذف گروه‌های پیش‌فرض مایا برای خروجی تمیزتر
+        # Drop Maya default groups for a cleaner export
         exclude = ['initialShadingGroup', 'initialParticleSE']
         targets = [sg for sg in all_shading_groups if sg not in exclude]
 
@@ -36,11 +36,11 @@ class MaterialPublisher:
             return None
 
         try:
-            # انتخاب تمام متریال‌ها و متعلقاتشان (Textures, Utilities, etc.)
+            # Select all materials and their dependents (textures, utilities, etc.)
             cmds.select(targets, noExpand=True)
             
-            # اکسپورت کردن بخش‌های انتخاب شده به صورت یک فایل مجزا
-            # استفاده از Maya ASCII (.ma) چون قابل ویرایش با نوت‌پد هم هست و خطایابی‌اش راحت‌تر است
+            # Export the selection as a separate file
+            # Maya ASCII (.ma) is editable in a text editor and easier to debug
             cmds.file(full_path, 
                       exportSelected=True, 
                       type='mayaAscii', 

@@ -12,8 +12,8 @@ rt = pymxs.runtime
 
 def create_clean_mxp(project_root, project_name):
     """
-    فایل کانفیگ پروژه (.mxp) را طوری می‌سازد که تمام مسیرهای مکس
-    به داخل فولدر _max_system هدایت شوند.
+    Builds the project config file (.mxp) so every Max path
+    is redirected into the _max_system folder.
     """
     full_project_path = os.path.join(project_root, project_name).replace("\\", "/")
     system_dir = "_max_system"
@@ -66,7 +66,7 @@ def create_clean_mxp(project_root, project_name):
         return None
 
 def cleanup_root_clutter(project_root, project_name):
-    """پاک کردن فولدرهای خالی مزاحم از روت"""
+    """Remove empty leftover folders from the root"""
     full_path = os.path.join(project_root, project_name)
     clutter = [
         "archives", "autoback", "downloads", "export", "express", 
@@ -112,18 +112,18 @@ def main():
 
     QTimer.singleShot(500, launch_cortex_ui)
 
-    # خواندن متغیرهای محیطی
+    # Read environment variables
     project_root = os.environ.get("CORTEX_PROJECT_ROOT")
     project_name = os.environ.get("CORTEX_PROJECT_NAME")
     work_path    = os.environ.get("CORTEX_WORK_PATH")
     fps_str      = os.environ.get("CORTEX_FPS")
     
-    # --- بخش جدید: خواندن رزولوشن ---
+    # --- Read resolution ---
     res_w = os.environ.get("CORTEX_RES_W")
     res_h = os.environ.get("CORTEX_RES_H")
     # -------------------------------
 
-    # 1. تنظیمات پروژه و MXP
+    # 1. Project and MXP settings
     if project_root and project_name:
         mxp_path = create_clean_mxp(project_root, project_name)
         if mxp_path and os.path.exists(mxp_path):
@@ -135,14 +135,14 @@ def main():
             except Exception as e:
                 print(f"!! Error loading project config: {e}")
 
-    # 2. تنظیمات صحنه (FPS & Resolution)
+    # 2. Scene settings (FPS & Resolution)
     if fps_str:
         try: 
             rt.frameRate = int(fps_str)
             print(f">> [Cortex] FPS Set to: {fps_str}")
         except: pass
         
-    # --- اعمال رزولوشن ---
+    # --- Apply resolution ---
     if res_w and res_h:
         try:
             rt.renderWidth = int(res_w)
@@ -151,11 +151,11 @@ def main():
             print(f">> [Cortex] Resolution Set to: {res_w}x{res_h}")
         except: pass
 
-    # 3. تنظیم مسیر کار (Work Path)
+    # 3. Work path
     if work_path and os.path.exists(work_path):
         rt.sysInfo.currentDir = work_path
 
-    # 4. تنظیم فریم رنج
+    # 4. Frame range
     start_frame = os.environ.get("CORTEX_FRAME_START")
     end_frame = os.environ.get("CORTEX_FRAME_END")
     if start_frame and end_frame:

@@ -23,11 +23,11 @@ class CortexDockWidget(QDockWidget):
         self.setAllowedAreas(Qt.TopDockWidgetArea | Qt.BottomDockWidgetArea)
         self.setAttribute(Qt.WA_DeleteOnClose, False)
         
-        # دریافت مسیر ورک از متغیرهای محیطی
+        # Read the work path from environment variables
         self.work_path = os.environ.get("CORTEX_WORK_PATH", "")
         self.task_label = os.environ.get("CORTEX_TASK_NAME", 
                           os.environ.get("CORTEX_TASK_ID", "Unknown"))
-        # --- ویجت اصلی ---
+        # --- Main widget ---
         self.main_widget = QFrame()
         self.main_widget.setObjectName("MainFrame")
         self.main_widget.setStyleSheet(style.MAINWIDGET)
@@ -37,32 +37,32 @@ class CortexDockWidget(QDockWidget):
         self.layout.setContentsMargins(5, 2, 5, 2)
         self.layout.setSpacing(10)
 
-        # 1. لوگو و نام تسک
+        # 1. Logo and task name
         self.create_context_section()
         self.add_separator()
 
-        # 2. مدیریت فایل (ورژن‌ها)
+        # 2. File management (versions)
         self.create_version_section()
         self.add_separator()
 
-        # 3. ابزارهای اصلی
+        # 3. Main tools
         self.create_tools_section()
         
-        self.layout.addStretch() # پر کردن فضای خالی
+        self.layout.addStretch() # Fill leftover space
 
-        # اسکن اولیه فایل‌ها
+        # Initial file scan
         self.refresh_versions()
 
     def create_context_section(self):
         """
         Handle Create Context Section operation.
         """
-        # آیکون یا متن کورتکس
+        # Cortex icon or label
         lbl_logo = QLabel("CORTEX")
         lbl_logo.setStyleSheet(style.MAINWIDGET)
         self.layout.addWidget(lbl_logo)
         
-        # نمایش نام تسک اصلاح شده
+        # Show the cleaned task name
         lbl_task = QLabel(self.task_label) 
         lbl_task.setObjectName("TaskLabel")
         lbl_task.setStyleSheet(style.MAINWIDGET)
@@ -72,28 +72,28 @@ class CortexDockWidget(QDockWidget):
         """
         Handle Create Version Section operation.
         """
-        # لی‌اوت برای این بخش
+        # Layout for this section
         v_layout = QHBoxLayout()
         v_layout.setSpacing(4)
 
-        # متن "Version:"
+        # "Version:" label
         v_layout.addWidget(QLabel("Ver:"))
 
-        # کومبوباکس ورژن‌ها
+        # Version combobox
         self.cmb_versions = QComboBox()
         self.cmb_versions.setToolTip("Select a version to Open")
-        # وقتی کاربر ورژن را عوض کرد، فایل لود شود (با احتیاط)
+        # When the user changes version, load the file (carefully)
         # self.cmb_versions.currentIndexChanged.connect(self.on_version_change) 
         v_layout.addWidget(self.cmb_versions)
 
-        # دکمه Load (برای اینکه لود شدن ناخواسته اتفاق نیفتد، دکمه جدا می‌گذاریم)
+        # Load button (separate so files are not loaded by accident)
         btn_load = QToolButton()
-        btn_load.setText("Load") # یا آیکون Play
-        btn_load.setStyleSheet(style.BTN_TOOLBAR) # <--- استفاده از استایل مرکزی
+        btn_load.setText("Load") # or a Play icon
+        btn_load.setStyleSheet(style.BTN_TOOLBAR) # <--- shared toolbar style
         btn_load.clicked.connect(self.load_selected_version)
         v_layout.addWidget(btn_load)
 
-        # دکمه رفرش (برای وقتی فایل جدیدی سیو شد)
+        # Refresh button (after a new save)
         btn_refresh = QToolButton()
         btn_refresh.setText("↻")
         btn_refresh.setToolTip("Refresh File List")
@@ -101,7 +101,7 @@ class CortexDockWidget(QDockWidget):
         btn_refresh.clicked.connect(self.refresh_versions)
         v_layout.addWidget(btn_refresh)
 
-        # دکمه باز کردن فولدر
+        # Open-folder button
         btn_explore = QToolButton()
         btn_explore.setText("📂")
         btn_explore.setToolTip("Open in Explorer")
@@ -115,7 +115,7 @@ class CortexDockWidget(QDockWidget):
         """
         Handle Create Tools Section operation.
         """
-        # --- دکمه جدید Loader ---
+        # --- New Loader button ---
         btn_loader = QPushButton("📂 Loader / Workfiles")
         btn_loader.setToolTip("Manage Tasks and Load Files")
         btn_loader.clicked.connect(self.run_loader)
@@ -159,9 +159,9 @@ class CortexDockWidget(QDockWidget):
         line.setProperty("class", "Separator")
         self.layout.addWidget(line)
 
-    # --- منطق فایل‌ها ---
+    # --- File logic ---
     def refresh_versions(self):
-        """اسکن فولدر ورک برای پیدا کردن فایل‌های مکس"""
+        """Scan the work folder for 3ds Max files"""
         self.cmb_versions.clear()
         
         if not self.work_path or not os.path.exists(self.work_path):
@@ -169,9 +169,9 @@ class CortexDockWidget(QDockWidget):
             return
 
         try:
-            # گرفتن تمام فایل‌های .max
+            # Collect every .max file
             files = [f for f in os.listdir(self.work_path) if f.lower().endswith(".max")]
-            # مرتب‌سازی برعکس (جدیدترین اول)
+            # Reverse sort (newest first)
             files.sort(reverse=True)
             
             if not files:
@@ -184,7 +184,7 @@ class CortexDockWidget(QDockWidget):
             print(f"!! Error scanning files: {e}")
 
     def load_selected_version(self):
-        """لود کردن فایلی که در کومبو انتخاب شده"""
+        """Load the file selected in the combo"""
         filename = self.cmb_versions.currentText()
         if not filename or filename in ["No Work Path", "No Files"]:
             return
@@ -192,34 +192,34 @@ class CortexDockWidget(QDockWidget):
         full_path = os.path.join(self.work_path, filename)
         
         if os.path.exists(full_path):
-            # استفاده از دستور مکس برای لود فایل
-            # quiet:True یعنی سوال نپرس (می‌توانید بردارید)
+            # Use the Max command to load the file
+            # quiet=True skips prompts (you can remove it)
             print(f">> Loading: {filename}")
             rt.loadMaxFile(full_path)
         else:
             print("!! File not found.")
 
     def open_explorer(self):
-        """باز کردن فولدر در ویندوز"""
+        """Open the folder in Windows Explorer"""
         if self.work_path and os.path.exists(self.work_path):
             os.startfile(self.work_path)
         else:
             print("!! Work path does not exist.")
 
-    # --- توابع ابزارها ---
+    # --- Tool functions ---
     def run_save(self):
         """
         Handle Run Save operation.
         """
         print(">> [Cortex] Launching Save UI...")
         try:
-            # 1. ایمپورت ماژول پنجره سیو
+            # 1. Import the save-window module
             import save_view
             import importlib
-            importlib.reload(save_view) # ریلود برای اینکه تغییرات کد اعمال شود
+            importlib.reload(save_view) # Reload so code changes apply
             
-            # 2. ساخت و نمایش پنجره
-            # self را به عنوان Parent می‌دهیم تا پنجره روی مکس بماند
+            # 2. Build and show the window
+            # Pass self as parent so the window stays on Max
             self.save_win = save_view.SaveWindow()
             self.save_win.show()
             
@@ -235,12 +235,12 @@ class CortexDockWidget(QDockWidget):
         """
         print(">> [Cortex] Launching Publish UI...")
         try:
-            # 1. ایمپورت ماژول پابلیش که ساختیم
+            # 1. Import the publisher module we built
             import publisher_max
             import importlib
-            importlib.reload(publisher_max) # ریلود برای اطمینان از تغییرات کد
+            importlib.reload(publisher_max) # Reload so code changes apply
             
-            # 2. اجرای تابع run
+            # 2. Run the function
             publisher_max.run()
             
         except Exception as e:
@@ -272,7 +272,7 @@ class CortexDockWidget(QDockWidget):
             import publisher_max
             import importlib
             importlib.reload(publisher_max)
-            # فراخوانی متد جدیدی که در مرحله بعد می‌سازیم
+            # Call the new method added in the next step
             pub = publisher_max.MaxPublisher()
             pub.run_lookdev_special() 
         except Exception as e:
@@ -280,15 +280,15 @@ class CortexDockWidget(QDockWidget):
     
 
 def show_ui():
-    """نمایش UI با تضمین حذف نسخه‌های قدیمی"""
+    """Show the UI and make sure old docks are removed"""
     main_win = qtmax.GetQMaxMainWindow()
     if not main_win: return
 
     dock_obj_name = "CortexDockWidget"
 
-    # --- FIX: حذف تمام داک‌های قدیمی ---
-    # به جای findChild تکی، تمام بچه‌ها را می‌گردیم و هرکدام اسمش Cortex بود حذف می‌کنیم
-    # این کار تضمین می‌کند داک‌های تکراری (Duplicate) از بین بروند
+    # --- FIX: delete every old dock ---
+    # Walk all children and remove any named Cortex instead of a single findChild
+    # This guarantees duplicate docks are gone
     children = main_win.findChildren(QDockWidget)
     for child in children:
         if child.objectName() == dock_obj_name:
@@ -298,7 +298,7 @@ def show_ui():
             child.deleteLater()
     # -----------------------------------
 
-    # ساخت داک جدید با کانتکست جدید (که از Loader ست شده)
+    # Build a new dock with the context set by the Loader
     cortex_dock = CortexDockWidget(main_win)
     main_win.addDockWidget(Qt.TopDockWidgetArea, cortex_dock)
     cortex_dock.show()

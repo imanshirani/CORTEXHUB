@@ -49,18 +49,18 @@ class BlenderLoader(QDialog):
         self.tabs = QTabWidget()
         main_layout.addWidget(self.tabs)
         
-        # Tab 1: Loader (همان UI قبلی که جابجا شد)
+        # Tab 1: Loader (previous UI, moved)
         self.tab_loader = QWidget()
         self.setup_loader_tab()
         self.tabs.addTab(self.tab_loader, "📂 Loader")
 
         
-        # Tab 2: Scene Manager (جدید)
+        # Tab 2: Scene Manager (new)
         self.tab_manager = QWidget()
         self.setup_manager_tab()
         self.tabs.addTab(self.tab_manager, "♻️ Scene Manager")
         
-        # Tab 3: Importer (جدید)
+        # Tab 3: Importer (new)
         self.tab_importer = QWidget()
         self.setup_importer_tab()
         self.tabs.addTab(self.tab_importer, "📥 Importer (Cross-App)")
@@ -70,7 +70,7 @@ class BlenderLoader(QDialog):
         self.setup_shot_contents_tab()
         self.tabs.addTab(self.tab_shot_contents, "🎬 Shot Contents")
         
-        # بررسی اولیه برای تب منیجر
+        # Initial check for the manager tab
         self.refresh_scene_manager()
 
     # ==========================================
@@ -171,24 +171,24 @@ class BlenderLoader(QDialog):
         self.table_refs.setHorizontalHeaderLabels(["Library Name", "Current Ver", "Latest Ver", "Status", "Action"])
         self.table_refs.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.table_refs.setSelectionBehavior(QAbstractItemView.SelectRows)
-        # استفاده از استایل مرکزی
+        # Shared style
         self.table_refs.setStyleSheet(style.TABLE_MANAGER)
         layout.addWidget(self.table_refs)
 
     def refresh_scene_manager(self):
-        """اسکن لینک‌های بلندر (bpy.data.libraries)"""
+        """Scan Blender links (bpy.data.libraries)"""
         self.table_refs.setRowCount(0)
         
-        # در بلندر، فایل‌های لینک شده در libraries ذخیره می‌شوند
+        # Linked files live in bpy.data.libraries
         for lib in bpy.data.libraries:
             if not lib.filepath: continue
             
-            # تبدیل مسیر نسبی (//) به مطلق برای بررسی فایل
+            # Convert a relative path (//) to absolute
             abs_path = bpy.path.abspath(lib.filepath)
             filename = os.path.basename(abs_path)
             folder = os.path.dirname(abs_path)
             
-            # آنالیز ورژن (Regex)
+            # Parse version (regex)
             match = re.search(r"_v(\d{3})", filename)
             
             current_ver = 0
@@ -200,7 +200,7 @@ class BlenderLoader(QDialog):
                 current_ver = int(ver_str)
                 prefix = filename.split(f"_v{ver_str}")[0]
                 
-                # جستجو برای ورژن جدیدتر
+                # Search for a newer version
                 if os.path.exists(folder):
                     files = os.listdir(folder)
                     max_v = current_ver
@@ -214,11 +214,11 @@ class BlenderLoader(QDialog):
                     
             is_outdated = latest_ver > current_ver
             
-            # پر کردن جدول
+            # Fill the table
             row = self.table_refs.rowCount()
             self.table_refs.insertRow(row)
             
-            self.table_refs.setItem(row, 0, QTableWidgetItem(lib.name)) # نام لایبرری در بلندر
+            self.table_refs.setItem(row, 0, QTableWidgetItem(lib.name)) # Library name in Blender
             self.table_refs.setItem(row, 1, QTableWidgetItem(f"v{current_ver:03d}"))
             
             item_lat = QTableWidgetItem(f"v{latest_ver:03d}")
@@ -232,25 +232,25 @@ class BlenderLoader(QDialog):
                 btn_upd = QPushButton("🚀 Update")
                 btn_upd.setStyleSheet(style.BTN_UPDATE)
                 
-                # ساخت مسیر جدید
+                # Build the new path
                 new_filename = filename.replace(f"v{current_ver:03d}", f"v{latest_ver:03d}")
                 new_full_path = os.path.join(folder, new_filename)
                 
-                # اتصال دکمه به تابع آپدیت
-                # نکته: ما اسم لایبرری را پاس می‌دهیم چون در بلندر با نام دسترسی داریم
+                # Connect the button to the update function
+                # Pass the library name because Blender looks up libraries by name
                 btn_upd.clicked.connect(lambda checked, lib_name=lib.name, path=new_full_path: self.do_update_library(lib_name, path))
                 self.table_refs.setCellWidget(row, 4, btn_upd)
             else:
                 self.table_refs.setItem(row, 4, QTableWidgetItem("-"))
 
     def do_update_library(self, lib_name, new_path):
-        """اجرای آپدیت در بلندر"""
+        """Run the update in Blender"""
         try:
             lib = bpy.data.libraries.get(lib_name)
             if lib:
-                # 1. تغییر مسیر فایل
+                # 1. Change the file path
                 lib.filepath = new_path
-                # 2. ریلود کردن دیتا از مسیر جدید
+                # 2. Reload data from the new path
                 lib.reload()
                 
                 QMessageBox.information(self, "Updated", f"Library '{lib_name}' updated successfully!")
@@ -272,7 +272,7 @@ class BlenderLoader(QDialog):
         
         splitter = QSplitter(Qt.Horizontal)
         
-        # سمت چپ: لیست تسک‌ها
+        # Left: task list
         self.list_tasks_imp = QListWidget()
         self.list_tasks_imp.itemClicked.connect(self.on_task_clicked_importer)
         layout_l = QVBoxLayout()
@@ -280,7 +280,7 @@ class BlenderLoader(QDialog):
         layout_l.addWidget(self.list_tasks_imp)
         w_left = QWidget(); w_left.setLayout(layout_l)
         
-        # سمت راست: لیست فایل‌های Interchange
+        # Right: interchange files
         self.list_files_imp = QListWidget()
         layout_r = QVBoxLayout()
         layout_r.addWidget(QLabel("Available Interchange Files (FBX/ABC):"))
@@ -321,7 +321,7 @@ class BlenderLoader(QDialog):
         layout = QVBoxLayout(self.tab_shot_contents)
         
         self.lbl_shot_info = QLabel("<b>Current Shot:</b> None")
-        self.lbl_shot_info.setStyleSheet("color: #d35400; font-size: 14px;") # رنگ نارنجی بلندر
+        self.lbl_shot_info.setStyleSheet("color: #d35400; font-size: 14px;") # Blender orange
         layout.addWidget(self.lbl_shot_info)
 
         self.table_shot_assets = QTableWidget()
@@ -349,7 +349,7 @@ class BlenderLoader(QDialog):
         context = self.db.get_task_context_data(task_id)
         if not context: return
         
-        # ۱. استخراج نام تسک برای فیلتر (مثلاً Head)
+        # 1. Task name used as a filter (e.g. Head)
         task_name_filter = context['task_title'].lower() 
 
         root = context['project_root']
@@ -358,7 +358,7 @@ class BlenderLoader(QDialog):
         fbx_folder = os.path.join(entity_path, "3d", "obj")
         
         if os.path.exists(fbx_folder):
-            # ۲. اعمال فیلتر هوشمند: فقط فایل‌هایی که نام تسک در آن‌هاست
+            # 2. Keep only files that contain the task name
             all_files = os.listdir(fbx_folder)
             filtered_files = [f for f in all_files 
                               if (f.endswith(".fbx") or f.endswith(".abc")) 
@@ -371,7 +371,7 @@ class BlenderLoader(QDialog):
                 self.list_files_imp.addItem(fi)
 
     def refresh_shot_contents(self):
-        """نمایش اَسِت‌های مرتبط با شات در بلندر"""
+        """Show assets linked to the shot in Blender"""
         self.table_shot_assets.setRowCount(0)
         task_id = os.environ.get("CORTEX_TASK_ID")
         if not task_id: return
@@ -379,7 +379,7 @@ class BlenderLoader(QDialog):
         context = self.db.get_task_context_data(task_id)
         if not context or context.get('type') != "Shot": return
 
-        # استفاده از کلید هوشمند entity_id که در دیتابیس اصلاح کردیم
+        # Use the entity_id key added in the database
         shot_id = context.get('entity_id') 
         
         if shot_id:
@@ -390,17 +390,17 @@ class BlenderLoader(QDialog):
                 self.table_shot_assets.setItem(row, 0, QTableWidgetItem(asset[1])) 
                 self.table_shot_assets.setItem(row, 1, QTableWidgetItem(asset[2])) 
                 
-                # ساخت مسیر بر اساس فایل سیستم بلندر
+                # Build the path from the Blender filesystem layout
                 asset_path = os.path.join(asset[3], asset[4], "Assets", asset[2], asset[1], "Work", "blender")
                 
                 btn_link = QPushButton("🔗 LINK Latest")
                 btn_link.setStyleSheet(style.BTN_CTX_XREF)
-                # در بلندر از متد on_link استفاده می‌کنیم
+                # Blender uses on_link
                 btn_link.clicked.connect(lambda chk=False, p=asset_path: self.link_latest_asset(p))
                 self.table_shot_assets.setCellWidget(row, 3, btn_link)
 
     def on_import_interchange(self):
-        """ایمپورت هوشمند به بلندر"""
+        """Smart import into Blender"""
         item = self.list_files_imp.currentItem()
         if not item: return
         path = item.data(Qt.UserRole)
@@ -408,10 +408,10 @@ class BlenderLoader(QDialog):
 
         try:
             if path.endswith(".fbx"):
-                # ایمپورت FBX با تنظیمات مقیاس درست برای هماهنگی با مکس
+                # FBX import with scale matching Max
                 bpy.ops.import_scene.fbx(filepath=path, use_manual_orientation=False, global_scale=1.0)
             elif path.endswith(".abc"):
-                # ایمپورت Alembic برای انیمیشن‌ها
+                # Alembic import for animation
                 bpy.ops.wm.alembic_import(filepath=path, as_background_job=False)
             
             QMessageBox.information(self, "Success", f"Imported: {os.path.basename(path)}")
@@ -499,7 +499,7 @@ class BlenderLoader(QDialog):
     # --- ACTIONS ---
 
     def on_assemble_all(self):
-        """وارد کردن تمام اَسِت‌های لینک شده به شات (مخصوص بلندر)"""
+        """Import every asset linked to the shot (Blender)"""
         task_id = os.environ.get("CORTEX_TASK_ID")
         context = self.db.get_task_context_data(task_id)
         
@@ -507,17 +507,17 @@ class BlenderLoader(QDialog):
             QMessageBox.warning(self, "Context Error", "This action is only available within a Shot task.")
             return
 
-        # دریافت لیست اَسِت‌ها از دیتابیس
+        # Asset list from the database
         linked_assets = self.db.get_shot_assets_extended(context['entity_id'])
         
         count = 0
         for asset in linked_assets:
-            # ساخت مسیر Work بلندر: Assets/Category/Name/Work/blender
-            # دقت کن که در دیتابیس: asset[3]=root, asset[4]=project_name, asset[2]=category, asset[1]=name
+            # Blender work path: Assets/Category/Name/Work/blender
+            # Database: asset[3]=root, asset[4]=project_name, asset[2]=category, asset[1]=name
             asset_work_path = os.path.join(asset[3], asset[4], "Assets", asset[2], asset[1], "Work", "blender")
             
             if os.path.exists(asset_work_path):
-                # پیدا کردن آخرین فایل blend
+                # Find the latest .blend
                 found_files = []
                 for root, dirs, files in os.walk(asset_work_path):
                     for f in files:
@@ -528,10 +528,10 @@ class BlenderLoader(QDialog):
                     found_files.sort(reverse=True)
                     latest_file = found_files[0]
                     
-                    # ذخیره مسیر در متغیر موقت کلاس و اجرای لینک
+                    # Store the path on the class and run the link
                     self.target_file_to_load = latest_file 
                     try:
-                        # استفاده از متد load_asset که قبلا تعریف کردیم (Link=True)
+                        # Use load_asset defined earlier (Link=True)
                         self.load_asset(link=True) 
                         count += 1
                     except Exception as e:
@@ -563,57 +563,57 @@ class BlenderLoader(QDialog):
         except: pass
 
     def load_asset(self, link=True):
-        """تابع هوشمند: اول تلاش برای لود کالکشن، اگر نبود لود آبجکت"""
+        """Try collections first, then objects"""
         path = self.get_selected_path()
         if not path: return
         
         try:
-            # متغیرها برای ذخیره نتیجه
+            # Result holders
             loaded_collections = []
             loaded_objects = []
 
-            # 1. بررسی و استخراج محتویات فایل
+            # 1. Inspect file contents
             with bpy.data.libraries.load(path, link=link) as (data_from, data_to):
-                # سناریو الف: اگر فایل استاندارد است و کالکشن دارد
+                # A: standard file with collections
                 if data_from.collections:
                     data_to.collections = data_from.collections
-                # سناریو ب: اگر فایل کالکشن ندارد (فال‌بک به آبجکت‌ها)
+                # B: no collections, fall back to objects
                 elif data_from.objects:
                     data_to.objects = data_from.objects
                 else:
                     QMessageBox.warning(self, "Empty File", "No Collections or Objects found in this file.")
                     return
 
-            # دسترسی به دیتاهای لود شده (بعد از بسته شدن with)
+            # Access loaded data after the with-block
             if hasattr(data_to, 'collections'):
                 loaded_collections = data_to.collections
             if hasattr(data_to, 'objects'):
                 loaded_objects = data_to.objects
 
-            # 2. وارد کردن به صحنه
-            # الف) وارد کردن کالکشن‌ها (روش تمیز)
+            # 2. Bring into the scene
+            # A) Collections (clean)
             for col in loaded_collections:
                 if col is not None:
                     if link:
-                        # ساخت Instance (روش استاندارد Staging)
+                        # Instance (staging)
                         empty = bpy.data.objects.new(col.name, None)
                         empty.instance_type = 'COLLECTION'
                         empty.instance_collection = col
                         bpy.context.collection.objects.link(empty)
                     else:
-                        # اپند کردن کامل (روش Lookdev)
+                        # Full append (lookdev)
                         bpy.context.collection.children.link(col)
             
-            # ب) وارد کردن آبجکت‌ها (اگر کالکشنی نبود)
+            # B) Objects if there were no collections
             count_obj = 0
             for obj in loaded_objects:
                 if obj is not None:
-                    # چک می‌کنیم که قبلا لینک نشده باشد
+                    # Skip if already linked
                     if obj.name not in bpy.context.scene.objects:
                         bpy.context.collection.objects.link(obj)
                         count_obj += 1
 
-            # گزارش نتیجه
+            # Report
             total = len([c for c in loaded_collections if c]) + count_obj
             action = "Linked" if link else "Appended"
             
@@ -643,10 +643,10 @@ class BlenderLoader(QDialog):
         self.load_asset(link=True)  # Link = Read Only (Reference)
 
     def link_latest_asset(self, blender_work_path):
-        """یافتن آخرین فایل .blend در پوشه ورک و لینک کردن آن"""
+        """Find the latest .blend in the work folder and link it"""
         if not os.path.exists(blender_work_path): return
         
-        # اسکن تمام ساب‌فولدرها برای پیدا کردن جدیدترین فایل
+        # Scan subfolders for the newest file
         all_files = []
         for root, dirs, files in os.walk(blender_work_path):
             for f in files:
@@ -654,9 +654,9 @@ class BlenderLoader(QDialog):
                     all_files.append(os.path.join(root, f))
         
         if not all_files: return
-        all_files.sort(reverse=True) # جدیدترین ورژن
+        all_files.sort(reverse=True) # Newest version
         
-        # ذخیره در متغیر موقت و اجرای لینک
+        # Store on a temp field and run the link
         self.target_file_to_load = all_files[0]
         self.on_link()
 

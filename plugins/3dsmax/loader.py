@@ -37,7 +37,7 @@ class LoaderWindow(QDialog):
         
         self.init_ui()
         self.load_my_tasks()
-        self.refresh_scene_manager() # بررسی اولیه صحنه
+        self.refresh_scene_manager() # Initial scene check
         self.refresh_shot_contents()
 
     def init_ui(self):
@@ -50,17 +50,17 @@ class LoaderWindow(QDialog):
         self.tabs = QTabWidget()
         main_layout.addWidget(self.tabs)
         
-        # Tab 1: Loader (کد قبلی)
+        # Tab 1: Loader (previous code)
         self.tab_loader = QWidget()
         self.setup_loader_tab()
         self.tabs.addTab(self.tab_loader, "📂 Loader")
         
-        # Tab 2: Scene Manager (کد جدید)
+        # Tab 2: Scene Manager (new)
         self.tab_manager = QWidget()
         self.setup_manager_tab()
         self.tabs.addTab(self.tab_manager, "♻️ Scene Manager")
         
-        # Tab 3: Importer (ایده شما)
+        # Tab 3: Importer
         self.tab_importer = QWidget()
         self.setup_importer_tab()
         self.tabs.addTab(self.tab_importer, "📥 Importer (Cross-App)")
@@ -163,19 +163,19 @@ class LoaderWindow(QDialog):
         layout.addWidget(self.table_refs)
 
     def refresh_scene_manager(self):
-        """اسکن صحنه برای پیدا کردن XRef ها و بررسی آپدیت"""
+        """Scan the scene for XRefs and check for updates"""
         self.table_refs.setRowCount(0)
         
-        # 1. گرفتن تعداد XRef ها از مکس
+        # 1. XRef count from Max
         xref_count = rt.xrefs.getXRefFileCount()
         for i in range(1, xref_count + 1):
-            # در MaxScript ایندکس از 1 شروع می‌شود
+            # MaxScript indexes start at 1
             file_path = rt.xrefs.getXRefFile(i).filename
             filename = os.path.basename(file_path)
             folder = os.path.dirname(file_path)
             
-            # 2. آنالیز نام فایل (Body_v001.max)
-            # Regex برای پیدا کردن vXXX
+            # 2. Parse the filename (Body_v001.max)
+            # Regex for vXXX
             match = re.search(r"_v(\d{3})", filename)
             
             asset_name = filename
@@ -188,7 +188,7 @@ class LoaderWindow(QDialog):
                 current_ver = int(ver_str)
                 prefix = filename.split(f"_v{ver_str}")[0] # Body
                 
-                # 3. جستجو در فولدر برای ورژن جدیدتر
+                # 3. Look in the folder for a newer version
                 if os.path.exists(folder):
                     files = os.listdir(folder)
                     max_v = current_ver
@@ -200,10 +200,10 @@ class LoaderWindow(QDialog):
                             except: pass
                     latest_ver = max_v
             
-            # 4. تعیین وضعیت
+            # 4. Set status
             is_outdated = latest_ver > current_ver
             
-            # 5. پر کردن جدول
+            # 5. Fill the table
             row = self.table_refs.rowCount()
             self.table_refs.insertRow(row)
             
@@ -213,9 +213,9 @@ class LoaderWindow(QDialog):
             # Latest
             item_lat = QTableWidgetItem(f"v{latest_ver:03d}")
             if is_outdated:
-                item_lat.setForeground(QColor("#ff5555")) # قرمز
+                item_lat.setForeground(QColor("#ff5555")) # red
             else:
-                item_lat.setForeground(QColor("#55ff55")) # سبز
+                item_lat.setForeground(QColor("#55ff55")) # green
             self.table_refs.setItem(row, 2, item_lat)
             
             # Status
@@ -226,10 +226,10 @@ class LoaderWindow(QDialog):
             if is_outdated:
                 btn_update = QPushButton("🚀 Update")
                 btn_update.setStyleSheet(style.BTN_UPDATE)
-                # ذخیره index مکس و مسیر جدید در دکمه
+                # Store the Max index and new path on the button
                 new_filename = filename.replace(f"v{current_ver:03d}", f"v{latest_ver:03d}")
                 new_full_path = os.path.join(folder, new_filename)
-                # اضافه کردن checked به ورودی لامبدا برای جلوگیری از TypeError
+                # Pass checked into the lambda to avoid TypeError
                 btn_update.clicked.connect(lambda checked=False, idx=i, path=new_full_path: self.do_update_xref(idx, path))
                 self.table_refs.setCellWidget(row, 4, btn_update)
             else:
@@ -246,10 +246,10 @@ class LoaderWindow(QDialog):
         """
         Handle Add Material Row To Manager operation.
         """
-        # بررسی ورژن جدید در پوشه
+        # Check the folder for a newer version
         folder = os.path.dirname(current_path)
-        # در اینجا متریال‌های نیتیو معمولاً نام ثابتی دارند، 
-        # اما اگر سیستم ورژن‌دهی برای .mat هم داری، اینجا چک می‌شود
+        # Native materials usually keep a fixed name,
+        # but if .mat files are versioned, that is checked here
         
         row = self.table_refs.rowCount()
         self.table_refs.insertRow(row)
@@ -258,27 +258,27 @@ class LoaderWindow(QDialog):
         self.table_refs.setItem(row, 1, QTableWidgetItem("Native Mat"))
         self.table_refs.setItem(row, 3, QTableWidgetItem("✅ Linked"))
         
-        # دکمه Re-Apply برای آپدیت سریع متریال اگر فایل روی هارد عوض شده باشد
+        # Re-Apply button to refresh a material if the file on disk changed
         btn_reapply = QPushButton("🔄 Re-Apply")
         btn_reapply.setStyleSheet(style.BTN_UPDATE)
         btn_reapply.clicked.connect(lambda: self.reapply_single_material(obj, current_path, mat_name))
         self.table_refs.setCellWidget(row, 4, btn_reapply)
 
     def do_update_xref(self, xref_index, new_path):
-        """اجرای آپدیت در مکس با متد اصلاح شده"""
+        """Run the update in Max with the fixed method"""
         try:
-            # 1. گرفتن رفرنس به فایل XRef (ایندکس مکس از 1 شروع می‌شود)
+            # 1. Get the XRef (Max indexes start at 1)
             xref_entry = rt.xrefs.getXRefFile(xref_index)
             
-            # 2. تغییر مسیر فایل به ورژن جدید
+            # 2. Point the file path at the new version
             xref_entry.filename = new_path
             
-            # 3. رفرش کردن صحنه برای اعمال تغییرات
-            # به جای rt.xrefs.updateChangedXRefFiles از این دستور استفاده می‌کنیم:
+            # 3. Refresh the scene
+            # Use this instead of rt.xrefs.updateChangedXRefFiles:
             pymxs.runtime.xrefs.updateChangedXRefs()
             
             
-            # اگر خط بالا باز هم ارور داد، از این جایگزین مطمئن استفاده کن:
+            # If the line above still errors, use this fallback:
             # rt.execute("xrefs.updateChangedXRefFiles()")
             
             QMessageBox.information(self, "Updated", f"Updated to: {os.path.basename(new_path)}")
@@ -296,12 +296,12 @@ class LoaderWindow(QDialog):
         """
         layout = QVBoxLayout(self.tab_importer)
         
-        # --- بخش تب‌ها را فعلاً حذف می‌کنیم تا سیستم Splitter تو درست کار کند ---
-        # چون توابعی مثل setup_geo_sub_tab را هنوز تعریف نکردیم، این‌ها باعث ارور می‌شوند.
+        # --- Tabs are disabled for now so the splitter works ---
+        # Functions like setup_geo_sub_tab are not defined yet and would crash
         
         splitter = QSplitter(Qt.Horizontal)
         
-        # سمت چپ: لیست تسک‌ها (دقیقاً کد خودت)
+        # Left: task list
         self.list_tasks_imp = QListWidget()
         self.list_tasks_imp.itemClicked.connect(self.on_task_clicked_importer)
         layout_l = QVBoxLayout()
@@ -309,19 +309,19 @@ class LoaderWindow(QDialog):
         layout_l.addWidget(self.list_tasks_imp)
         w_left = QWidget(); w_left.setLayout(layout_l)
         
-        # سمت راست: لیست فایل‌ها (دقیقاً کد خودت)
+        # Right: file list
         self.list_files_imp = QListWidget()
         layout_r = QVBoxLayout()
         layout_r.addWidget(QLabel("Available Interchange Files (FBX/ABC/MAT):"))
         layout_r.addWidget(self.list_files_imp)
         
-        # دکمه ایمپورت قدیمی خودت
+        # Existing import button
         self.btn_import_fbx = QPushButton("📥 Import FBX/ABC to Scene")
         self.btn_import_fbx.setStyleSheet(style.BTN_SUCCESS)
         self.btn_import_fbx.clicked.connect(self.on_import_fbx)
         layout_r.addWidget(self.btn_import_fbx)
 
-        # --- دکمه جدید برای متریال (فقط همین یک مورد اضافه شد) ---
+        # --- New material button (this is the only addition) ---
         self.btn_assign_mat = QPushButton("🎨 ASSIGN NATIVE MATERIALS")
         self.btn_assign_mat.setStyleSheet(style.BTN_CTX_LOOKDEV)
         self.btn_assign_mat.clicked.connect(self.on_assign_materials) 
@@ -363,7 +363,7 @@ class LoaderWindow(QDialog):
         layout.addWidget(self.btn_assemble_all)
 
     def refresh_shot_contents(self):
-        """نمایش اَسِت‌های مرتبط با شات باز شده در مکس"""
+        """Show assets linked to the open shot in Max"""
         self.table_shot_assets.setRowCount(0)
         task_id = os.environ.get("CORTEX_TASK_ID")
         if not task_id: return
@@ -377,12 +377,12 @@ class LoaderWindow(QDialog):
         if shot_id:
             linked_assets = self.db.get_shot_assets_extended(shot_id)
             for asset in linked_assets:
-                # ریشه پوشه max
+                # Root of the max folder
                 max_root = os.path.join(asset[3], asset[4], "Assets", asset[2], asset[1], "publish", "3d", "max").replace("\\", "/")
                 
                 has_caches = False
                 if os.path.exists(max_root):
-                    # گشتن در تمام زیرپوشه‌ها (BODY, HEAD و...)
+                    # Walk subfolders (BODY, HEAD, ...)
                     for task_folder in os.listdir(max_root):
                         task_path = os.path.join(max_root, task_folder).replace("\\", "/")
                         if os.path.isdir(task_path):
@@ -411,7 +411,7 @@ class LoaderWindow(QDialog):
     # ==========================================
 
     def on_import_interchange(self):
-        """ایمپورت هوشمند FBX یا Alembic به مکس"""
+        """Smart FBX or Alembic import into Max"""
         item = self.list_files_imp.currentItem()
         if not item: return
         path = item.data(Qt.UserRole)
@@ -422,8 +422,8 @@ class LoaderWindow(QDialog):
                 rt.importFile(path, rt.Name("noPrompt"), using=rt.FBXIMP)
             
             elif path.endswith(".abc"):
-                # ایمپورت المبیک در مکس
-                # ما از روش Import استفاده می‌کنیم که آبجکت را با مادیفایر Alembic Mesh وارد می‌کند
+                # Alembic import in Max
+                # Import brings the object in with an Alembic Mesh modifier
                 rt.importFile(path, rt.Name("noPrompt"), using=rt.Alembic_Import)
                 
             QMessageBox.information(self, "Success", f"Imported: {os.path.basename(path)}")
@@ -459,7 +459,7 @@ class LoaderWindow(QDialog):
         if not os.path.exists(publish_3d): 
             publish_3d = os.path.join(entity_path, "publish", "3d")
         
-        # ۱. اسکن پوشه‌های مختلف با در نظر گرفتن زیرپوشه تسک
+        # 1. Scan folders including the task subfolder
         for folder_name in ["obj", "abc", "vdb"]:
             folder = os.path.join(publish_3d, folder_name, safe_task).replace("\\", "/")
             if os.path.exists(folder):
@@ -469,7 +469,7 @@ class LoaderWindow(QDialog):
                         fi.setData(Qt.UserRole, os.path.join(folder, f))
                         self.list_files_imp.addItem(fi)
 
-        # ۲. اضافه کردن مسیر متریال‌ها (از داخل زیرپوشه تسک)
+        # 2. Add material paths from the task subfolder
         mat_folder = os.path.join(publish_3d, "lookdev", safe_task).replace("\\", "/")
         if not os.path.exists(mat_folder): 
             mat_folder = os.path.join(publish_3d, "lookdev", "materials").replace("\\", "/")
@@ -483,20 +483,20 @@ class LoaderWindow(QDialog):
                     self.list_files_imp.addItem(fi)
 
     def on_import_fbx(self):
-        """ایمپورت هوشمند FBX به مکس"""
+        """Smart FBX import into Max"""
         item = self.list_files_imp.currentItem()
         if not item: return
         path = item.data(Qt.UserRole)
         if not path or not os.path.exists(path): return
 
         try:
-            # تنظیمات ایمپورتر FBX مکس برای هماهنگی با بلندر
-            # بلندر معمولا Z-Up است، مکس هم Z-Up است اما گاهی در تبدیل Y-Up می‌شود
+            # Max FBX importer settings to match Blender
+            # Blender is usually Z-up; Max is Z-up too but conversion can flip to Y-up
             rt.FBXImporterSetParam("ScaleConversion", True)
             rt.FBXImporterSetParam("UpAxis", "Z") 
             rt.FBXImporterSetParam("FileUnits", "Centimeters")
             
-            # اجرای ایمپورت (بدون باز شدن پنجره تنظیمات برای سرعت بیشتر)
+            # Import without opening the options dialog (faster)
             rt.importFile(path, rt.Name("noPrompt"), using=rt.FBXIMP)
             
             QMessageBox.information(self, "Success", f"Imported: {os.path.basename(path)}")
@@ -540,7 +540,7 @@ class LoaderWindow(QDialog):
         safe_dept = dept_name.replace(" ", "")
         safe_task = context['task_title'].replace(" ", "_")
         
-        # اصلاح مسیر بر اساس ساختار یکپارچه: Work / 3D / Dept / max / Task
+        # Path follows Work / 3D / Dept / max / Task
         path = os.path.join(root, proj, entity_type_dir, context['parent_name'], context['entity_name'], 
                             "Work", "3D", safe_dept, "max", safe_task).replace("\\", "/")
         
@@ -613,7 +613,7 @@ class LoaderWindow(QDialog):
             except Exception as e: QMessageBox.critical(self, "Error", str(e))
 
     def on_assign_materials(self):
-        """لود کردن کتابخانه متریال و نسبت دادن خودکار بر اساس نام"""
+        """Load a material library and assign by name"""
         item = self.list_files_imp.currentItem()
         if not item or not item.text().startswith("💎"): 
             QMessageBox.warning(self, "Warning", "Please select a MATERIAL file.")
@@ -630,7 +630,7 @@ class LoaderWindow(QDialog):
                 
                 if obj:
                     obj.material = m
-                    # ذخیره مسیر فایل در AppData آبجکت برای مدیریت بعدی
+                    # Store the file path on the object AppData for later
                     rt.setUserProp(obj, "Cortex_Mat_Source", mat_path)
                     rt.setUserProp(obj, "Cortex_Mat_Name", m.name)
                     assign_count += 1
@@ -641,36 +641,36 @@ class LoaderWindow(QDialog):
 
 
     def xref_latest_from_path(self, asset_3d_path):
-        """یافتن آخرین نسخه پابلیش شده و وارد کردن به صورت XRef"""
-        # ۱. چک کردن وجود فیزیکی پوشه 3d/max
+        """Find the latest published version and bring it in as an XRef"""
+        # 1. Check that 3d/max exists on disk
         if not os.path.exists(asset_3d_path):
             print(f">> [Cortex Error] Path not found: {asset_3d_path}")
             return
 
-        # ۲. لیست کردن تمام فایل‌های مکس
+        # 2. List all Max files
         files = [f for f in os.listdir(asset_3d_path) if f.endswith(".max")]
         
         if not files:
             print(f">> [Cortex Warning] No .max files found in: {asset_3d_path}")
             return
             
-        # ۳. سورت کردن بر اساس حروف الفبا و اعداد (آخرین ورژن vXXX می‌افتد آخر لیست)
+        # 3. Sort so the last vXXX is at the end of the list
         files.sort()
-        latest_filename = files[-1] # انتخاب آخرین عضو لیست
+        latest_filename = files[-1] # Last item in the list
         full_path = os.path.join(asset_3d_path, latest_filename).replace("\\", "/")
 
         try:
-            # ۴. اجرای دستور XRef در مکس
+            # 4. XRef command in Max
             print(f">> [Cortex] Attempting to XRef: {latest_filename}")
             rt.xrefs.addNewXRefFile(full_path)
             
-            # ۵. رفرش کردن جدول منیجر برای نمایش فایل جدید
+            # 5. Refresh the manager table so the new file appears
             self.refresh_scene_manager() 
         except Exception as e:
             print(f"!! [Cortex] XRef Failed for {latest_filename}: {e}")
 
     def on_assemble_all(self):
-        """وارد کردن تمام اَسِت‌های لینک شده به شات با یک کلیک"""
+        """Import every asset linked to the shot in one click"""
         task_id = os.environ.get("CORTEX_TASK_ID")
         context = self.db.get_task_context_data(task_id)
         if not context or context.get('type') != "Shot": return

@@ -3,13 +3,13 @@ import importlib
 importlib.reload(hda_creator)
 import hou
 
-# اجرای تابع ساخت نود هوشمند
+# Run the smart node builder
 hda_creator.create_cortex_node()
 
 try:
     obj = hou.node("/obj")
     cortex_node = obj.createNode("geometry", "CORTEX_OUT")
-    cortex_node.setColor(hou.Color((0, 0.47, 0.8))) # رنگ آبی کورتکس
+    cortex_node.setColor(hou.Color((0, 0.47, 0.8))) # Cortex blue
     print(">> [Cortex] Publisher Node Created.")
 except:
     pass

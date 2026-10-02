@@ -14,7 +14,7 @@ class DeptDialog(QDialog):
         self.session = session
         self.dept_to_edit = dept_to_edit
         
-        # رنگ پیش‌فرض (خاکستری)
+        # Default color (gray)
         self.selected_color = "#888888"
         
         title = "Edit Department" if dept_to_edit else "Add Department"
@@ -88,10 +88,10 @@ class DeptDialog(QDialog):
         self.layout.addLayout(btn_layout)
 
     def pick_color(self):
-        """باز کردن پالت رنگ"""
+        """Open the color palette"""
         color = QColorDialog.getColor(QColor(self.selected_color), self, "Select Department Color")
         if color.isValid():
-            self.selected_color = color.name() # فرمت هگز (#RRGGBB)
+            self.selected_color = color.name() # Hex format (#RRGGBB)
             self.color_btn.setStyleSheet(f"background-color: {self.selected_color}; border: 1px solid #555;")
             self.color_hex_lbl.setText(self.selected_color)
 
@@ -99,30 +99,30 @@ class DeptDialog(QDialog):
         """
         Handle Load Data operation.
         """
-        # لود کردن نام و رنگ
+        # Load name and color
         self.name_input.setText(self.dept_to_edit.get('name', ""))
         self.selected_color = self.dept_to_edit.get('color', "#888888")
         
-        # ۱. لود کردن نرم‌افزار در کامبوباکس
+        # 1. Loading the software in the combo box
         if 'allowed_software' in self.dept_to_edit:
             sw_value = self.dept_to_edit['allowed_software']
-            # اگر مقدار در دیتابیس All بود، باید دقیقا با گزینه کامبوباکس ست شود
+            # If the value was All in the database, it must be set exactly with the combobox option
             index = self.sw_combo.findText(sw_value, Qt.MatchExactly)
             if index >= 0:
                 self.sw_combo.setCurrentIndex(index)
             else:
-                # اگر حروف کوچک/بزرگ فرق داشت، به این صورت پیدا کن
+                # If case is different, find it like this
                 index = self.sw_combo.findText(sw_value, Qt.MatchFixedString)
                 if index >= 0: self.sw_combo.setCurrentIndex(index)
         
-        # ۲. لود کردن انجین در کامبوباکس
+        # 2. Loading the engine in combobox
         if 'render_engine' in self.dept_to_edit:
             eng_value = self.dept_to_edit['render_engine']
             index = self.engine_combo.findText(eng_value, Qt.MatchExactly)
             if index >= 0:
                 self.engine_combo.setCurrentIndex(index)
 
-        # آپدیت ظاهر دکمه رنگ
+        # Update the appearance of the color button
         self.color_btn.setStyleSheet(f"background-color: {self.selected_color}; border: 1px solid #555;")
         self.color_hex_lbl.setText(self.selected_color)
 
@@ -139,12 +139,12 @@ class DeptDialog(QDialog):
             return
 
         if self.dept_to_edit:
-            # حالت ویرایش
+            # Edit mode
             success = self.session.db.update_department_extended(
                 self.dept_to_edit['id'], name, self.selected_color, sw, engine
             )
         else:
-            # حالت ساخت جدید (این متد را در مرحله اول به دیتابیس اضافه کردیم)
+            # New construction mode (we added this method to the database in the first step)
             success = self.session.db.create_department_extended(
                 name, self.selected_color, sw, engine
             )

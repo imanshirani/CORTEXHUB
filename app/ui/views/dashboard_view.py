@@ -1,7 +1,7 @@
 import os
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, 
                                QTableWidgetItem, QHeaderView, QLabel, QPushButton, 
-                               QMenu, QMessageBox, QCheckBox) # QCheckBox اضافه شد
+                               QMenu, QMessageBox, QCheckBox) # Added QCheckBox
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor, QAction , QPixmap, QIcon
 from app.ui import style
@@ -79,7 +79,7 @@ class DashboardView(QWidget):
             t_id, status, dept_name, project_name, title, desc, entity_id = task
             self.table.insertRow(idx)
             
-            # دریافت قفل‌ها از دیتابیس
+            # Obtaining locks from the database
             task_info = self.session.db.get_task_by_id(t_id)
             allowed_sw, render_engine = "all", None
             if task_info:
@@ -97,12 +97,12 @@ class DashboardView(QWidget):
             sw_wdg = QWidget(); sw_lay = QHBoxLayout(sw_wdg)
             sw_lay.setContentsMargins(5, 0, 5, 0); sw_lay.setSpacing(4)
             
-            # --- اصلاح: گرفتن لیست کامل از دیتابیس به جای لیست ثابت ---
+            # --- Correction: getting the complete list from the database instead of the fixed list ---
             all_softwares = self.session.db.get_software_list()
             
             for sw_name in all_softwares:
                 sw_name_clean = sw_name.lower().strip()
-                # بررسی اینکه آیا این دپارتمان اجازه استفاده از این نرم‌افزار را دارد
+                # Checking whether this department is allowed to use this software
                 if allowed_sw == "all" or sw_name_clean in allowed_sw:
                     icon = style.get_sw_icon(sw_name_clean)
                     if icon:
@@ -138,20 +138,20 @@ class DashboardView(QWidget):
             s_lay.addWidget(s_box); s_lay.addWidget(QLabel(status)); s_lay.addStretch()
             self.table.setCellWidget(idx, 5, s_wdg)
             
-            # 6. Action (Launch + Go) - ستون آخر
+            # 6. Action (Launch + Go) - last column
             btn_launch = QPushButton("🚀 Launch")
             btn_launch.setStyleSheet(style.LUNCH_BTN)
             btn_launch.clicked.connect(lambda _, tid=t_id: self.show_launch_menu(tid))
             
-            # --- NEW: دکمه پرش به تسک ---
+            # --- NEW: Jump to task button ---
             btn_goto = QPushButton("🎯 Go")
             btn_goto.setStyleSheet(style.BTN_SM_INFO) 
             btn_goto.setToolTip("Go to this task in Production/Assets")
             
-            # پیدا کردن نوع (Shot یا Asset) برای ارسال سیگنال
-            e_type = "Shot" if task_info and task_info[7] else "Unknown" # پیش‌فرض
+            # Find the type (Shot or Asset) to send the signal
+            e_type = "Shot" if task_info and task_info[7] else "Unknown" # default
             if task_info:
-                # چک می‌کنیم آیا این entity_id در جدول shots هست یا assets (با کمک get_task_context_data)
+                # We check if this entity_id is in the shots or assets table (with the help of get_task_context_data)
                 ctx = self.session.db.get_task_context_data(t_id)
                 if ctx: e_type = ctx.get("type", "Shot")
 
@@ -161,7 +161,7 @@ class DashboardView(QWidget):
             btn_container = QWidget()
             btn_lay = QHBoxLayout(btn_container)
             btn_lay.setContentsMargins(5, 5, 5, 5)
-            btn_lay.addWidget(btn_goto)    # اضافه شدن دکمه گو
+            btn_lay.addWidget(btn_goto)    # Added Go button
             btn_lay.addWidget(btn_launch)
             self.table.setCellWidget(idx, 6, btn_container)
 
@@ -185,10 +185,10 @@ class DashboardView(QWidget):
         lbl.setToolTip(tip)
         return lbl
     
-    # ... (توابع show_launch_menu, run_launcher و ... بدون تغییر باقی بمانند) ...
+    # ... (functions show_launch_menu, run_launcher and ... remain unchanged) ...
     def show_launch_menu(self, task_id):
         """
-        نمایش منوی کلیک‌راست برای اجرای نرم‌افزارها با آیکون‌های هوشمند
+        Show right-click menu to run software with smart icons
         """
         task_info = self.session.db.get_task_by_id(task_id)
         if not task_info: return
@@ -199,23 +199,23 @@ class DashboardView(QWidget):
         allowed_sw = res[0].lower() if res else "all"
 
         menu = QMenu(self)
-        # رفع ارور: استفاده از MENU_STYLE که الان در استایل تعریف کردیم
+        # Fixing the error: using MENU_STYLE that we defined in the style
         menu.setStyleSheet(style.MENU_STYLE) 
 
-        # لیست کامل نرم‌افزارها از دیتابیس
+        # The complete list of software from the database
         all_softwares = self.session.db.get_software_list()
 
         for sw in all_softwares:
             sw_name_clean = sw.lower().strip()
             
-            # بررسی اجازه دسترسی دپارتمان
+            # Check departmental access permission
             if allowed_sw == "all" or sw_name_clean in allowed_sw:
-                # گرفتن آیکون هوشمند از فایل style
+                # Getting the smart icon from the style file
                 icon_path = style.get_sw_icon(sw_name_clean)
                 
                 action = QAction(sw, self)
                 
-                # اگر آیکون وجود داشت، آن را به منو اضافه کن
+                # If there is an icon, add it to the menu
                 if icon_path and os.path.exists(icon_path):
                     action.setIcon(QIcon(icon_path))
                 

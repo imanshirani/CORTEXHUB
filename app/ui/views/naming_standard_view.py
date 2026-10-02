@@ -25,7 +25,7 @@ class NamingStandardView(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # --- ۱. اضافه کردن انتخاب‌گر پروژه برای رفع مشکل None بودن ID ---
+        # --- 1. Add project selector to fix ID being None ---
         selector_layout = QHBoxLayout()
         selector_layout.addWidget(QLabel("Filter by Project:"))
         
@@ -33,7 +33,7 @@ class NamingStandardView(QWidget):
         self.project_combo.setStyleSheet(style.COMBOBOX_STYLE)
         self.project_combo.setMinimumWidth(250)
         
-        # لود کردن لیست پروژه‌ها از دیتابیس
+        # Loading the list of projects from the database
         projects = self.db.get_all_projects()
         for proj in projects:
             self.project_combo.addItem(proj.name, proj.id)
@@ -43,7 +43,7 @@ class NamingStandardView(QWidget):
         selector_layout.addStretch()
         layout.addLayout(selector_layout)
 
-        # --- ۲. هدر و دکمه افزودن ---
+        # --- 2. Add header and button ---
         header_layout = QHBoxLayout()
         header_layout.addWidget(QLabel("<h2>Naming Standards</h2>"))
         header_layout.addStretch()
@@ -55,7 +55,7 @@ class NamingStandardView(QWidget):
         
         layout.addLayout(header_layout)
 
-        # --- ۳. جدول نمایش داده‌ها ---
+        # --- 3. Data display table ---
         self.table = QTableWidget(0, 5)
         self.table.setHorizontalHeaderLabels(["Category", "Prefix", "Suffix", "Hierarchy", "Actions"])
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -63,11 +63,11 @@ class NamingStandardView(QWidget):
         self.table.setStyleSheet(style.TABLE_MANAGER)
         layout.addWidget(self.table)
 
-        # اجرای اولیه برای لود دیتای اولین پروژه
+        # Initial implementation to load the data of the first project
         self.on_project_changed()
 
     def on_project_changed(self):
-        """آپدیت آیدی پروژه و رفرش جدول"""
+        """Update the project ID and refresh the table"""
         self.project_id = self.project_combo.currentData()
         self.refresh_table()
 
@@ -77,22 +77,22 @@ class NamingStandardView(QWidget):
         """
         self.table.setRowCount(0)
 
-        # اگر هنوز پروژه‌ای انتخاب نشده، از متد خارج شو
+        # If no project is selected yet, exit the method
         if not self.project_id:
             return
 
-        # فراخوانی متد دیتابیس با آیدی پروژه انتخاب شده
+        # Calling the database method with the selected project ID
         standards = self.db.get_naming_standards(self.project_id)
         
         for row_idx, std in enumerate(standards):
             self.table.insertRow(row_idx)
-            # نمایش ستون‌ها بر اساس ساختار متد get_naming_standards
+            # Displaying columns based on the structure of the get_naming_standards method
             self.table.setItem(row_idx, 0, QTableWidgetItem(str(std[2]))) # Category
             self.table.setItem(row_idx, 1, QTableWidgetItem(str(std[3]))) # Prefix
             self.table.setItem(row_idx, 2, QTableWidgetItem(str(std[4]))) # Suffix
             self.table.setItem(row_idx, 3, QTableWidgetItem(str(std[5]))) # Hierarchy
 
-            # بخش دکمه‌های عملیاتی (بدون تغییر)
+            # Operational buttons section (unchanged)
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
             actions_layout.setContentsMargins(2, 2, 2, 2)
@@ -112,14 +112,14 @@ class NamingStandardView(QWidget):
     
 
     def load_projects_list(self):
-        """پر کردن لیست پروژه‌ها از دیتابیس"""
+        """Filling the list of projects from the database"""
         self.project_combo.clear()
         projects = self.db.get_all_projects()
         for proj in projects:
             self.project_combo.addItem(proj.name, proj.id)
 
     def on_project_changed(self):
-        """آپدیت کردن آیدی پروژه فعلی"""
+        """Update the ID of the current project"""
         self.project_id = self.project_combo.currentData()
         self.refresh_table()
 
@@ -127,7 +127,7 @@ class NamingStandardView(QWidget):
         """
         Handle Open Add Dialog operation.
         """
-        # حتما self.project_id را پاس بده
+        # Be sure to pass self.project_id
         dialog = NamingStandardDialog(self.session, self.project_id, parent=self)
         if dialog.exec():
             self.refresh_table()

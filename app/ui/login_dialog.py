@@ -13,20 +13,20 @@ class LoginDialog(QDialog):
         super().__init__()
         self.session = session
         
-        # تنظیمات پنجره
+        # Window settings
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.resize(350, 450)
         
-        # لایوت اصلی
+        # The main layout
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
 
-        # کانتینر اصلی
+        # Main container
         self.bg_frame = QFrame()
-        self.bg_frame.setStyleSheet(style.LOGIN_BG_FRAME) # استفاده از استایل
+        self.bg_frame.setStyleSheet(style.LOGIN_BG_FRAME) # Use style
         
-        # سایه
+        # the shadow
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(20)
         shadow.setXOffset(0)
@@ -45,60 +45,60 @@ class LoginDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(30, 40, 30, 30)
 
-        # 1. دکمه بستن
+        # 1. Close button
         top_layout = QHBoxLayout()
         top_layout.addStretch()
         self.btn_close = QPushButton("✕")
         self.btn_close.setFixedSize(30, 30)
         self.btn_close.setCursor(Qt.PointingHandCursor)
-        self.btn_close.setStyleSheet(style.LOGIN_CLOSE_BTN) # استفاده از استایل
+        self.btn_close.setStyleSheet(style.LOGIN_CLOSE_BTN) # Use style
         self.btn_close.clicked.connect(self.reject)
         top_layout.addWidget(self.btn_close)
         layout.addLayout(top_layout)
 
-        # 2. لوگو و عنوان
+        # 2. Logo and title
         title = QLabel(f"{config.APP_NAME}")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet(style.LOGIN_TITLE) # استفاده از استایل
+        title.setStyleSheet(style.LOGIN_TITLE) # Use style
         layout.addWidget(title)
 
         
         
         subtitle = QLabel(f"{config.SUBTITLE}")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet(style.LOGIN_SUBTITLE) # استفاده از استایل
+        subtitle.setStyleSheet(style.LOGIN_SUBTITLE) # Use style
         layout.addWidget(subtitle)
 
-        # 3. ورودی‌ها
+        # 3. Entries
         self.user_input = QLineEdit()
         self.user_input.setPlaceholderText("Username")
         self.user_input.setFixedHeight(45)
-        self.user_input.setStyleSheet(style.LOGIN_INPUT) # استفاده از استایل
+        self.user_input.setStyleSheet(style.LOGIN_INPUT) # Use style
         layout.addWidget(self.user_input)
 
         self.pass_input = QLineEdit()
         self.pass_input.setPlaceholderText("Password")
         self.pass_input.setEchoMode(QLineEdit.Password)
         self.pass_input.setFixedHeight(45)
-        self.pass_input.setStyleSheet(style.LOGIN_INPUT) # استفاده از استایل
+        self.pass_input.setStyleSheet(style.LOGIN_INPUT) # Use style
         layout.addWidget(self.pass_input)
 
-        # 4. لیبل ارور
+        # 4. Label error
         self.error_label = QLabel("")
         self.error_label.setAlignment(Qt.AlignCenter)
-        self.error_label.setStyleSheet(style.LOGIN_ERROR_LBL) # استفاده از استایل
+        self.error_label.setStyleSheet(style.LOGIN_ERROR_LBL) # Use style
         self.error_label.setFixedHeight(20)
         layout.addWidget(self.error_label)
 
-        # 5. دکمه لاگین
+        # 5. Login button
         self.btn_login = QPushButton("LOGIN")
         self.btn_login.setCursor(Qt.PointingHandCursor)
         self.btn_login.setFixedHeight(45)
-        self.btn_login.setStyleSheet(style.LOGIN_BTN) # استفاده از استایل
+        self.btn_login.setStyleSheet(style.LOGIN_BTN) # Use style
         self.btn_login.clicked.connect(self.check_login)
         layout.addWidget(self.btn_login)
         
-        # 6. ورژن
+        # 6. Version
         version_label = QLabel(f"{config.VERSION}")
         version_label.setAlignment(Qt.AlignCenter)
         version_label.setStyleSheet(style.LOGIN_VERSION)
@@ -119,7 +119,7 @@ class LoginDialog(QDialog):
         password = self.pass_input.text()
 
         self.error_label.setText("") 
-        # ریست کردن استایل به حالت عادی
+        # Reset the style to normal
         self.user_input.setStyleSheet(style.LOGIN_INPUT)
         self.pass_input.setStyleSheet(style.LOGIN_INPUT)
 
@@ -135,8 +135,8 @@ class LoginDialog(QDialog):
             self.shake_window()
 
     def shake_window(self):
-        """تغییر رنگ بوردر به قرمز در صورت خطا"""
-        # استفاده از استایل ارور که در فایل style تعریف کردیم
+        """Change border color to red in case of error"""
+        # Using the style error that we defined in the style file
         self.user_input.setStyleSheet(style.LOGIN_INPUT_ERROR)
         self.pass_input.setStyleSheet(style.LOGIN_INPUT_ERROR)
 

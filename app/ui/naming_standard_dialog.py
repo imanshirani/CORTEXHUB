@@ -83,7 +83,7 @@ class NamingStandardDialog(QDialog):
             return
 
         data = {
-            "project_id": self.project_id, # حتما از مقداری که از View آمده استفاده کن
+            "project_id": self.project_id, # Be sure to use the value from View
             "category": self.cat_combo.currentText(),
             "prefix": self.prefix_input.text().strip(),
             "suffix": self.suffix_input.text().strip(),
@@ -96,7 +96,7 @@ class NamingStandardDialog(QDialog):
             success = self.db.add_naming_standard(data)
 
         if success:
-            print(f">> Naming Standard Saved for project: {self.project_id}") # برای دیباگ
+            print(f">> Naming Standard Saved for project: {self.project_id}") # for debugging
             self.accept()
         else:
             QMessageBox.critical(self, "Error", "Failed to save naming standard.")

@@ -21,7 +21,7 @@ class SaveWindow(QWidget):
         self.task_name = os.environ.get("CORTEX_TASK_NAME", "Unknown")
         
         self.init_ui()
-        # کمی تاخیر بیشتر برای اطمینان از لود شدن
+        # Extra delay so Blender finishes loading
         QTimer.singleShot(300, self.capture_preview)
 
     def init_ui(self):
@@ -70,10 +70,10 @@ class SaveWindow(QWidget):
         return ver
 
     def capture_preview(self):
-        """گرفتن عکس با پیدا کردن دقیق پنجره و اسکرین"""
+        """Capture a still using the exact window and screen"""
         temp_path = os.path.join(os.environ["TEMP"], "cortex_blend_thumb.jpg")
         
-        # 1. پیدا کردن پنجره‌ای که دارای نمای 3D است
+        # 1. Find a window that has a 3D view
         found_window = None
         found_area = None
         
@@ -91,7 +91,7 @@ class SaveWindow(QWidget):
             return
 
         try:
-            # 2. ذخیره تنظیمات رندر
+            # 2. Store render settings
             scene = bpy.context.scene
             old_path = scene.render.filepath
             old_fmt = scene.render.image_settings.file_format
@@ -99,12 +99,12 @@ class SaveWindow(QWidget):
             scene.render.image_settings.file_format = 'JPEG'
             scene.render.filepath = temp_path
             
-            # 3. استفاده از Override با پنجره و اسکرین صحیح
-            # نکته: حتماً باید screen را هم پاس بدهیم تا ارور nullptr ندهد
+            # 3. Override with the correct window and screen
+            # Pass screen as well or you get a nullptr error
             with bpy.context.temp_override(window=found_window, screen=found_window.screen, area=found_area):
                 bpy.ops.render.opengl(write_still=True)
             
-            # 4. بازگرداندن تنظیمات
+            # 4. Restore settings
             scene.render.filepath = old_path
             scene.render.image_settings.file_format = old_fmt
             

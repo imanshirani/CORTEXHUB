@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QLineEdit,
 from PySide6.QtCore import Qt
 from app.ui import style
 
-# 1. ایمپورت کردن فایل سیستم (این خط حیاتی است)
+# 1. Import the file system (this line is vital)
 from app.core.filesystem import FileSystemManager 
 
 class ProjectDialog(QDialog):
@@ -19,7 +19,7 @@ class ProjectDialog(QDialog):
         title = "Edit Project" if project_to_edit else "Create New Project"
         self.setWindowTitle(title)
         self.resize(400, 350)
-        self.setStyleSheet(style.DIALOG_STYLESHEET) # یا استایل مورد نظر خودتان
+        self.setStyleSheet(style.DIALOG_STYLESHEET) # or your desired style
         
         self.layout = QVBoxLayout(self)
         self.setup_ui()
@@ -84,7 +84,7 @@ class ProjectDialog(QDialog):
         btn_layout = QHBoxLayout()
         self.btn_save = QPushButton("Save Project")
         self.btn_save.setStyleSheet(style.BTN_SUCCESS)
-        # self.btn_save.setObjectName("LoginButton") # اگر استایل خاصی دارید
+        # self.btn_save.setObjectName("LoginButton") # If you have a special style
         self.btn_save.clicked.connect(self.save_project)
         
         self.btn_cancel = QPushButton("Cancel")
@@ -122,7 +122,7 @@ class ProjectDialog(QDialog):
         """
         Handle Save Project operation.
         """
-        # 2. حتما از strip استفاده کنید تا فاصله اضافی باعث ارور نشود
+        # 2. Be sure to use strip so that extra space does not cause errors
         name = self.name_input.text().strip()
         code = self.code_input.text().upper().strip()
         path = self.path_input.text().strip()
@@ -141,12 +141,12 @@ class ProjectDialog(QDialog):
             # Create New Project
             success = self.session.db.create_project(name, code, path, render_engine, software)
             
-            # --- بخش مهم: ساخت فولدرها ---
+            # --- Important part: making folders ---
             if success:
-                # ساخت مسیر کامل: Root + Project Name
+                # Build the full path: Root + Project Name
                 full_project_path = os.path.join(path, name)
                 
-                # صدا زدن تابع ساخت فولدر
+                # Calling the folder creation function
                 FileSystemManager.create_project_structure(self.session.db, full_project_path)
             # -----------------------------
 

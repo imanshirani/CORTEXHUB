@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLabel, QTextEdit, QFrame, QMessageBox)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-import style # استفاده از استایل مشترک
+import style # Shared style
 
 class SaveWindow(QWidget):
     def __init__(self, parent=None):
@@ -48,7 +48,7 @@ class SaveWindow(QWidget):
         layout.addWidget(self.btn_save)
 
     def calculate_version(self):
-        """مشابه مکس، ورژن بعدی را پیدا می‌کند"""
+        """Like Max, find the next version number"""
         if not os.path.exists(self.work_path): return
         files = [f for f in os.listdir(self.work_path) if f.endswith((".mb", ".ma"))]
         current_max = 0
@@ -62,9 +62,9 @@ class SaveWindow(QWidget):
         self.lbl_version.setText(f"v{self.next_version:03d}")
 
     def capture_thumbnail(self):
-        """گرفتن عکس از ویوپورت مایا (معادل getViewportDib در مکس)"""
+        """Capture the Maya viewport (Max getViewportDib equivalent)"""
         temp_path = os.path.join(os.environ["TEMP"], "maya_save_thumb.jpg")
-        # استفاده از Playblast برای تک فریم
+        # Playblast a single frame
         cmds.playblast(frame=cmds.currentTime(q=True), format="image", viewer=False, 
                        compression="jpg", completeFilename=temp_path, widthHeight=[480, 270])
         self.lbl_thumbnail.setPixmap(QPixmap(temp_path))
@@ -75,11 +75,11 @@ class SaveWindow(QWidget):
         jpg_file = os.path.join(self.work_path, f"{base_name}.jpg")
 
         try:
-            # ذخیره در مایا
+            # Save in Maya
             cmds.file(rename=maya_file)
             cmds.file(save=True, type='mayaBinary')
             
-            # ذخیره تصویر
+            # Save the image
             if self.lbl_thumbnail.pixmap():
                 self.lbl_thumbnail.pixmap().save(jpg_file, "JPG")
             

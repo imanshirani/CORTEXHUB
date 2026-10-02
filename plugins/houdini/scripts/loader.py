@@ -140,10 +140,10 @@ class LoaderWindow(QDialog):
         layout.addWidget(self.table_refs)
 
     def refresh_scene_manager(self):
-        """اسکن صحنه هودینی برای پیدا کردن نودهای Alembic و VDB"""
+        """Scan the Houdini scene for Alembic and VDB nodes"""
         self.table_refs.setRowCount(0)
         
-        # پیدا کردن تمام نودهای کش در صحنه
+        # Find every cache node in the scene
         cache_nodes = []
         for node in hou.node("/").allSubChildren():
             ntype = node.type().name()
@@ -204,7 +204,7 @@ class LoaderWindow(QDialog):
                 self.table_refs.setItem(row, 4, QTableWidgetItem("-"))
 
     def do_update_cache(self, node, parm_name, new_path):
-        """آپدیت مسیر فایل در نود هودینی"""
+        """Update the file path on a Houdini node"""
         try:
             node.parm(parm_name).set(new_path)
             QMessageBox.information(self, "Updated", f"Node updated to: {os.path.basename(new_path)}")
@@ -266,7 +266,7 @@ class LoaderWindow(QDialog):
             publish_3d = os.path.join(entity_path, "publish", "3d")
             
         for folder_name in ["abc", "vdb"]:
-            # حالا به جای اینکه فقط تو پوشه abc بگرده، میره تو abc/BODY
+            # Search abc/BODY instead of only abc
             folder = os.path.join(publish_3d, folder_name, safe_task).replace("\\", "/")
             if os.path.exists(folder):
                 for f in os.listdir(folder):
@@ -285,7 +285,7 @@ class LoaderWindow(QDialog):
                     self.list_files_imp.addItem(fi)
 
     def on_import_cache(self):
-        """ایجاد هوشمند نود بر اساس نوع فایل"""
+        """Create a node from the file type"""
         item = self.list_files_imp.currentItem()
         if not item: return
         path = item.data(Qt.UserRole).replace("\\", "/")
@@ -347,12 +347,12 @@ class LoaderWindow(QDialog):
         if shot_id:
             linked_assets = self.db.get_shot_assets_extended(shot_id)
             for asset in linked_assets:
-                # ریشه پوشه abc
+                # Root of the abc folder
                 abc_root = os.path.join(asset[3], asset[4], "Assets", asset[2], asset[1], "publish", "3d", "abc").replace("\\", "/")
                 
                 has_caches = False
                 if os.path.exists(abc_root):
-                    # گشتن در تمام زیرپوشه‌ها (BODY, HEAD و...)
+                    # Walk subfolders (BODY, HEAD, ...)
                     for task_folder in os.listdir(abc_root):
                         task_path = os.path.join(abc_root, task_folder).replace("\\", "/")
                         if os.path.isdir(task_path):
@@ -360,7 +360,7 @@ class LoaderWindow(QDialog):
                             row = self.table_shot_assets.rowCount()
                             self.table_shot_assets.insertRow(row)
                             
-                            # نمایش نام اَسِت به همراه نام قطعه
+                            # Show asset name plus part name
                             self.table_shot_assets.setItem(row, 0, QTableWidgetItem(f"{asset[1]} ({task_folder})")) 
                             self.table_shot_assets.setItem(row, 1, QTableWidgetItem(asset[2])) 
                             
@@ -378,7 +378,7 @@ class LoaderWindow(QDialog):
                     self.table_shot_assets.setItem(row, 3, QTableWidgetItem("🚫 No Caches"))
 
     def load_latest_cache(self, folder_path):
-        """پیدا کردن آخرین نسخه کش Alembic و لود آن در صحنه"""
+        """Find the latest Alembic cache and load it"""
         if not os.path.exists(folder_path):
             print(f">> [Cortex Warning] No caches found at: {folder_path}")
             return False
@@ -452,13 +452,13 @@ class LoaderWindow(QDialog):
         safe_dept = dept_name.replace(" ", "")
         safe_task = context['task_title'].replace(" ", "_")
         
-        # اصلاح مسیر دقیقاً بر اساس ساختار لانچر شما
-        # ساختار: work / 3D / Dept / software / Task
+        # Path matches the launcher layout
+        # Layout: work / 3D / Dept / software / Task
         path = os.path.join(root, proj, entity_type_dir, context['parent_name'], context['entity_name'], 
                             "work", "3D", safe_dept, "houdini", safe_task).replace("\\", "/")
         
         if os.path.exists(path):
-            # پیدا کردن فایل‌های هودینی (hip و hipnc برای نسخه آموزشی)
+            # Houdini files (hip and hipnc for apprentice)
             files = [f for f in os.listdir(path) if f.endswith(".hip") or f.endswith(".hipnc")]
             files.sort(reverse=True)
             for f in files:

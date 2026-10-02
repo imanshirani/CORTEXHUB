@@ -8,23 +8,23 @@ class MaterialPublisher:
         """
         Handle   Init   operation.
         """
-        # دریافت مستقیم مسیری که از پابلیشر اصلی فرستاده شده (بدون اضافه کردن پوشه اضافی)
+        # Use the path from the main publisher (no extra folder)
         self.lookdev_dir = publish_path 
         
         if not os.path.exists(self.lookdev_dir):
             os.makedirs(self.lookdev_dir)
 
     def publish(self, engine_name=None):
-        """ذخیره مستقیم متریال‌های انجین فعال صحنه"""
+        """Save the active render-engine materials directly"""
         
         active_engine = engine_name if engine_name else "Unknown"
         print(f"\n>> [Cortex Lookdev] Publishing Native Materials for: {active_engine}")
 
-        # نام فایل بر اساس انجین (مثلا mat_lib_octane.mat)
+        # Filename from the engine (e.g. mat_lib_octane.mat)
         filename = f"mat_lib_{active_engine.lower().replace(' ', '_')}.mat"
         full_path = os.path.join(self.lookdev_dir, filename).replace("\\", "/")
         
-        # ذخیره کل Scene Materials به صورت یک کتابخانه واحد
+        # Save all Scene Materials as one library
         rt.saveMaterialLibrary(full_path)
         
         print(f">> [Cortex] Material Library Published: {full_path}")

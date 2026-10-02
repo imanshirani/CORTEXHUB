@@ -18,17 +18,17 @@ class ProjectMembersDialog(QDialog):
         
         self.layout = QVBoxLayout(self)
         
-        # عنوان
+        # title
         lbl = QLabel("Select users for this project:")
         lbl.setStyleSheet("color: #aaa; margin-bottom: 5px;")
         self.layout.addWidget(lbl)
 
-        # لیست چک‌باکس دار
+        # List with checkboxes
         self.user_list = QListWidget()
         self.user_list.setStyleSheet(style.LIST_WIDGET_STYLE)
         self.layout.addWidget(self.user_list)
 
-        # دکمه‌ها
+        # Buttons
         btn_layout = QHBoxLayout()
         self.btn_save = QPushButton("Save Changes")
         self.btn_save.setStyleSheet(style.BTN_PRIMARY)
@@ -49,20 +49,20 @@ class ProjectMembersDialog(QDialog):
         """
         Handle Load Users operation.
         """
-        # 1. گرفتن تمام یوزرهای سیستم
+        # 1. Getting all system users
         all_users = self.session.db.get_all_users()
         
-        # 2. گرفتن اعضای فعلی این پروژه (فقط آیدی‌ها)
+        # 2. Get the current members of this project (IDs only)
         current_member_ids = self.session.db.get_project_member_ids(self.project.id)
         
         for user in all_users:
             item = QListWidgetItem(f"{user.full_name} ({user.role})")
             item.setData(Qt.UserRole, user.id)
             
-            # اضافه کردن چک‌باکس
+            # Add a checkbox
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             
-            # اگر آیدی یوزر در لیست اعضا بود، تیک بزن
+            # If the user ID is in the list of members, check it
             if user.id in current_member_ids:
                 item.setCheckState(Qt.Checked)
             else:
@@ -74,14 +74,14 @@ class ProjectMembersDialog(QDialog):
         """
         Handle Save Members operation.
         """
-        # جمع‌آوری آیدی یوزرهای تیک خورده
+        # Collecting ticked user IDs
         selected_ids = []
         for i in range(self.user_list.count()):
             item = self.user_list.item(i)
             if item.checkState() == Qt.Checked:
                 selected_ids.append(item.data(Qt.UserRole))
         
-        # ذخیره در دیتابیس
+        # Save in database
         if self.session.db.update_project_members(self.project.id, selected_ids):
             QMessageBox.information(self, "Success", "Project members updated!")
             self.accept()

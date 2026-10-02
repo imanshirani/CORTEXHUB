@@ -41,7 +41,8 @@ Set each DCC executable path in **Settings > Utilities**. Empty paths are unused
 | `app/` | Hub UI (PySide6) and SQLite core |
 | `plugins/` | DCC plugins: 3ds Max, Maya, Blender, Houdini, Photoshop |
 | `resource/icons/` | App and software icons |
-| `docs/` | Generated API HTML |
+| `docs/en/` | English API reference (pdoc) |
+| `docs/fa/` | Persian user guide |
 
 A local SQLite file is created under `app/core/` on first launch. Postgres is reserved for a later server/cloud setup.
 

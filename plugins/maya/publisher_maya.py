@@ -2,15 +2,15 @@
 import sys
 import os
 import shutil
-import maya.cmds as cmds  # معادل pymxs در مکس
+import maya.cmds as cmds  # Maya equivalent of pymxs
 from PySide6.QtWidgets import QMessageBox
 
 # =========================================================
-# PATH FIX (برای دسترسی به هسته اپلیکیشن)
+# PATH FIX (reach the app core)
 # =========================================================
 try:
     current_script_path = os.path.dirname(os.path.abspath(__file__))
-    # بازگشت به ریشه پروژه (Cortex_Pipeline)
+    # Walk back to the Cortex_Pipeline root
     root_path = os.path.dirname(os.path.dirname(current_script_path))
     if root_path not in sys.path:
         sys.path.append(root_path)
@@ -35,23 +35,23 @@ class MayaPublisher:
             QMessageBox.critical(None, "Context Error", "Please launch Maya from Cortex.")
             return
 
-        # شبیه‌سازی Session برای دیالوگ
+        # Fake a session for the dialog
         class MockSession:
             def __init__(self, db): self.db = db
         session = MockSession(self.db)
         
-        # در مایا نیازی به qtmax نیست، مستقیماً از دیالوگ استفاده می‌کنیم
+        # Maya does not need qtmax; use the dialog directly
         parent = None 
 
-        # تشخیص دپارتمان برای فعال کردن گزینه‌های خروجی
+        # Detect department so output options can turn on
         task_data = self.db.get_task_by_id(self.task_id)
         dept_name = task_data[2].lower() if task_data else "general"
         maya_opts = self.get_maya_options(dept_name)
             
-        # گرفتن اسکرین‌شات از ویوپورت مایا برای تامنیل
+        # Screenshot the Maya viewport for the thumbnail
         temp_thumb = os.path.join(os.environ["TEMP"], "cortex_maya_thumb.jpg")
         try:
-            # دستور مایا برای ذخیره ویوپورت فعلی
+            # Maya command for the current viewport
             cmds.playblast(frame=cmds.currentTime(q=True), format="image", 
                            viewer=False, compression="jpg", completeFilename=temp_thumb,
                            widthHeight=[480, 270])
@@ -145,20 +145,20 @@ class MayaPublisher:
                 if not cmds.pluginInfo("AbcExport", q=True, loaded=True):
                     cmds.loadPlugin("AbcExport")
                 
-                # رفع باگ نامگذاری: حالا دقیقاً مثل هودینی و مکس اسم می‌گیرد (مثلا BODY_v002.abc)
+                # Naming fix: same pattern as Houdini and Max (e.g. BODY_v002.abc)
                 abc_name = f"{task_name}_v{version_num:03d}.abc"
                 abc_path = os.path.join(dest_abc, abc_name).replace("\\", "/")
                 
                 print(f">> Exporting Alembic: {abc_name}")
                 
-                # رفع باگ Root: پیدا کردن تمام آبجکت‌های اصلی (Top-level) در صحنه
+                # Root fix: find every top-level object in the scene
                 top_nodes = cmds.ls(assemblies=True)
                 if not top_nodes:
                     raise Exception("Scene is empty! Nothing to export.")
                     
                 root_args = " ".join([f"-root {node}" for node in top_nodes])
                 
-                # اکسپورت با استفاده از نودهای پیدا شده
+                # Export using the nodes we found
                 cmds.AbcExport(j=f"-frameRange 1 1 {root_args} -file \"{abc_path}\"")
                 published_files['alembic'] = abc_path
 
@@ -167,7 +167,7 @@ class MayaPublisher:
                 if not cmds.pluginInfo("fbxmaya", q=True, loaded=True):
                     cmds.loadPlugin("fbxmaya")
                 
-                # رفع باگ نامگذاری FBX
+                # FBX naming fix
                 fbx_name = f"{task_name}_v{version_num:03d}.fbx"
                 fbx_path = os.path.join(dest_obj, fbx_name).replace("\\", "/")
                 
@@ -175,7 +175,7 @@ class MayaPublisher:
                 cmds.file(fbx_path, force=True, options="v=0;", typ="FBX export", pr=True, ea=True)
                 published_files['export_geo'] = fbx_path
 
-            # ثبت در دیتابیس
+            # Register in the database
             success, pub_id = self.db.create_publish(
                 task_id=self.task_id,
                 version=version_num,
@@ -196,7 +196,7 @@ class MayaPublisher:
 
     def get_publish_root(self):
         """Helper to find the asset root folder."""
-        # همان منطقی که در مکس داشتی اینجا هم کار می‌کند
+        # Same logic as Max
         parts = self.work_path.replace("\\", "/").split("/")
         for i, p in enumerate(parts):
             if p.lower() == "work":
@@ -205,11 +205,11 @@ class MayaPublisher:
 
     def validate(self, data):
         """Basic validation for Maya scene."""
-        # اینجا می‌توانیم چک کنیم که مثلاً اسمی خالی نباشد یا تاریخچه (History) پاک شده باشد
+        # e.g. empty names or leftover history
         return True
     
     def export_lookdev_assets(self):
-        """فراخوانی سیستم بسته‌بندی متریال مایا با مسیر دقیق"""
+        """Call the Maya material packager with an exact path"""
         try:
             import publisher_mat_maya
             import importlib
@@ -218,7 +218,7 @@ class MayaPublisher:
             engine = self.db.get_setting("render_engine", default="Arnold") 
             task_name = os.environ.get("CORTEX_TASK_NAME", "out").replace(" ", "_")
             
-            # ساخت مسیر دقیق: publish/3D/lookdev/TASK_NAME
+            # Exact path: publish/3D/lookdev/TASK_NAME
             lookdev_base = self.db.get_publish_path(self.task_id, software="lookdev", category="3d")
             if not lookdev_base:
                 lookdev_base = os.path.join(self.get_publish_root(), "publish", "3D", "lookdev").replace("\\", "/")

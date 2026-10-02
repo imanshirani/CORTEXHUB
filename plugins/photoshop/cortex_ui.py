@@ -13,13 +13,13 @@ class PhotoshopCortexBar(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.resize(850, 65)
         
-        # دریافت اطلاعات از محیط
+        # Read context from environment variables
         self.work_path = os.environ.get("CORTEX_WORK_PATH", "")
         self.task_label = os.environ.get("CORTEX_TASK_NAME", "Unknown")
         self.project_name = os.environ.get("CORTEX_PROJECT_NAME", "Project")
         self.task_id = os.environ.get("CORTEX_TASK_ID")
 
-        # فریم اصلی مشابه بلندر
+        # Main frame, same pattern as the Blender toolbar
         self.main_widget = QFrame(self)
         self.main_widget.setObjectName("MainFrame")
         self.main_widget.setStyleSheet(style.PHOTOSHOP_FRAME)
@@ -36,14 +36,14 @@ class PhotoshopCortexBar(QWidget):
         lbl_logo.setStyleSheet(style.LBL_LOGO)
         self.layout.addWidget(lbl_logo)
 
-        # نمایش نام پروژه و تسک در کنار هم
+        # Show project name and task side by side
         lbl_task = QLabel(f"{self.project_name} | {self.task_label}")
         lbl_task.setStyleSheet(style.LBL_TASK)
         self.layout.addWidget(lbl_task)
         
         self.add_separator()
         
-        # 2. Versions Section (مشابه بلندر)
+        # 2. Versions Section (same as Blender)
         self.cmb_versions = QComboBox()
         self.cmb_versions.setMinimumWidth(150)
         self.cmb_versions.setStyleSheet(style.MAINWIDGET)
@@ -59,36 +59,36 @@ class PhotoshopCortexBar(QWidget):
 
         self.layout.addWidget(self.cmb_versions)
 
-        # اضافه کردن دکمه لود اختصاصی
+        # Dedicated Load button
         self.btn_load = QPushButton("📂 Load")
         self.btn_load.setFixedWidth(70)
-        self.btn_load.setStyleSheet(style.BTN_TOOLBAR) # یا استایل آبی دلخواه
+        self.btn_load.setStyleSheet(style.BTN_TOOLBAR) # or a custom blue style
         self.btn_load.clicked.connect(self.open_selected_version)
         self.layout.addWidget(self.btn_load)
 
         self.add_separator()
         
         # 3. Tools Section
-        # دکمه ساخت سند جدید (مخصوص فتوشاپ)
+        # New document button (Photoshop-specific)
         btn_new = QPushButton("📄 New")
         btn_new.setToolTip("Create Canvas with Project Resolution")
         btn_new.setStyleSheet(style.BTN_CTX_SAVE)
         btn_new.clicked.connect(self.create_doc)
         self.layout.addWidget(btn_new)
 
-        # دکمه Save Incremental
+        # Incremental Save button
         btn_save = QPushButton("Save +")
         btn_save.setStyleSheet(style.BTN_CTX_SAVE)
         btn_save.clicked.connect(self.run_save_dialog)        
         self.layout.addWidget(btn_save)
 
-        # دکمه Publish با استایل سبز استاندارد
+        # Publish button with the standard green style
         btn_pub = QPushButton("🚀 Publish")
         btn_pub.setStyleSheet(style.BTN_CTX_PUBLISH)
         btn_pub.clicked.connect(self.run_publish)
         self.layout.addWidget(btn_pub)
         
-        # دکمه بستن
+        # Close button
         btn_close = QPushButton("✕")
         btn_close.setFixedSize(25, 25)
         btn_close.setStyleSheet(style.BTN_CLOSE)
@@ -97,7 +97,7 @@ class PhotoshopCortexBar(QWidget):
 
 
     def quit_app(self):
-        """بستن کامل کورتکس و آزاد کردن رم سیستم"""
+        """Quit Cortex fully and free process memory."""
         self.close()
         QApplication.quit()
 
@@ -108,7 +108,7 @@ class PhotoshopCortexBar(QWidget):
         self.layout.addWidget(line)
 
     def refresh_versions(self):
-        """فقط لیست کردن فایل‌های PSD بدون باز کردن آن‌ها"""
+        """List PSD files in the work folder without opening them."""
         self.cmb_versions.clear()
         if os.path.exists(self.work_path):
             files = [f for f in os.listdir(self.work_path) if f.endswith(".psd")]
@@ -119,7 +119,7 @@ class PhotoshopCortexBar(QWidget):
                 self.cmb_versions.addItem("No versions found")
 
     def create_doc(self):
-        """ساخت داکیومنت بر اساس رزولوشن ست شده در لانچر"""
+        """Create a document using the resolution set by the launcher."""
         try:
             import photoshop.api as ps
             app = ps.Application()
@@ -135,16 +135,16 @@ class PhotoshopCortexBar(QWidget):
         self.save_win.show()
 
     def run_publish(self):
-        """باز کردن ایمن پنجره پابلیشر"""
+        """Open the publisher window safely."""
         try:
             import photoshop_publisher
-            # به جای ری‌لود کردن کلاس، مستقیماً از ماژول استفاده کن
+            # Use the module directly instead of reloading the class
             self.pub_win = photoshop_publisher.PhotoshopPublisher(self.task_id)
             self.pub_win.show()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Publisher Error: {e}")
 
-    # قابلیت جابه‌جایی با موس
+    # Drag the toolbar with the mouse
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
@@ -154,10 +154,10 @@ class PhotoshopCortexBar(QWidget):
 
 
     def open_selected_version(self):
-        """باز کردن ورژن انتخاب شده در فتوشاپ"""
+        """Open the selected version in Photoshop."""
         selected_file = self.cmb_versions.currentText()
         
-        # چک کردن اعتبار فایل
+        # Validate the selected file
         if not selected_file or "No" in selected_file:
             QMessageBox.warning(self, "Warning", "Please select a valid version.")
             return
@@ -171,12 +171,12 @@ class PhotoshopCortexBar(QWidget):
         try:
             import photoshop.api as ps
             app = ps.Application()
-            app.load(file_path) # باز کردن فایل
+            app.load(file_path) # open the file
             print(f">> [Cortex] File Loaded: {selected_file}")
         except Exception as e:
             print(f">> [Error] Photoshop Load Failed: {e}")
 
-cortex_ps_bar = None # تعریف متغیر گلوبال برای جلوگیری از Garbage Collection
+cortex_ps_bar = None # keep a global ref so the toolbar is not garbage-collected
 
 def show_ui():
     global cortex_ps_bar
@@ -184,7 +184,7 @@ def show_ui():
     if not app:
         app = QApplication(sys.argv)
     
-    # --- این خط جادویی مشکل بسته شدن تولبار را برای همیشه حل میکند ---
+    # Keep the process alive when the last Qt window closes (toolbar would otherwise quit)
     app.setQuitOnLastWindowClosed(False) 
     
     cortex_ps_bar = PhotoshopCortexBar()

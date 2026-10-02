@@ -19,8 +19,8 @@ class Project:
     render_engine: str = "--------"
     software: str = "--------"
     
-    # فعلاً این‌ها را اینجا نگه می‌داریم، حتی اگر در دیتابیس نباشند
-    # در آینده می‌توانیم این‌ها را هم به جدول projects اضافه کنیم
+    # We'll keep these here for now, even if they're not in the database
+    # In the future, we can add these to the projects table
     framerate: int = 24 
     resolution: tuple = (1920, 1080)
 
@@ -34,8 +34,8 @@ class Task:
 @dataclass
 class Context:
     """
-    این کلاس مهم‌ترین بخش است.
-    نشان می‌دهد الان کاربر دقیقاً کجای پایپ‌لاین ایستاده.
+    This class is the most important part.
+    It shows exactly where the user is in the pipeline.
     """
     user: Optional[User] = None
     project: Optional[Project] = None

@@ -1,6 +1,6 @@
 # Location: plugins/3dsmax/style.py
 
-# --- استایل داک اصلی (Cortex Dock) ---
+# --- Main dock style (Cortex Dock) ---
 MAINWIDGET = """
     QFrame#MainFrame {
         background-color: #2d2d2d;
@@ -40,7 +40,7 @@ MAINWIDGET = """
     }
 """
 
-# --- استایل پنجره سیو (Save Window) ---
+# --- Save window style ---
 SAVEWINDOW = """
     QWidget { background-color: #2d2d2d; color: #eee; font-family: 'Segoe UI'; }
     QLineEdit, QTextEdit { 
@@ -55,7 +55,7 @@ SAVEWINDOW = """
     QLabel#VersionLabel { font-size: 18px; color: #4CAF50; font-weight: bold; }
 """
 
-# --- استایل پنجره پابلیش و لودر (Publish & Loader) ---
+# --- Publish and loader window style ---
 PUBLISH_DIALOG = """
     QDialog { background-color: #2d2d2d; color: #eee; font-family: 'Segoe UI'; }
     QLabel { color: #ddd; }
@@ -81,7 +81,7 @@ PUBLISH_DIALOG = """
     QCheckBox { color: #ddd; spacing: 8px; }
     QCheckBox::indicator { width: 18px; height: 18px; }
 
-    /* لیست‌ها در لودر */
+    /* Lists in the loader */
     QListWidget {
         background-color: #222;
         border: 1px solid #444;
@@ -96,13 +96,13 @@ PUBLISH_DIALOG = """
         color: white;
     }
     
-    /* تب‌ها در لودر */
+    /* Tabs in the loader */
     QTabWidget::pane { border: 1px solid #444; }
     QTabBar::tab { background: #333; color: #aaa; padding: 8px 20px; }
     QTabBar::tab:selected { background: #555; color: white; border-bottom: 2px solid #007acc; }
 """
 
-# --- دکمه‌های استاندارد (مورد نیاز Loader و Publisher) ---
+# --- Standard buttons (Loader and Publisher) ---
 BTN_SUCCESS = """
     QPushButton { 
         background-color: #28a745; color: white; border: none; 
@@ -123,7 +123,7 @@ LBL_THUMBNAIL = """
     border: 2px dashed #444; background-color: #222;
 """
 
-# --- Toolbar Buttons (دکمه‌های کوچک مثل Load, Refresh) ---
+# --- Toolbar Buttons (small ones like Load, Refresh) ---
 BTN_TOOLBAR = """
     QToolButton { 
         background-color: #333; 
@@ -141,7 +141,7 @@ BTN_TOOLBAR = """
     }
 """
 
-# --- Context Buttons (دکمه‌های رنگی اصلی) ---
+# --- Context Buttons (main colored buttons) ---
 BTN_CTX_LOADER = """
     QPushButton { 
         background-color: #d35400; 
@@ -213,7 +213,7 @@ TABLE_MANAGER = """
     }
 """
 
-# --- دکمه آپدیت (Update Button) ---
+# --- Update button ---
 BTN_UPDATE = """
     QPushButton {
         background-color: #d35400;
@@ -227,7 +227,7 @@ BTN_UPDATE = """
     }
 """
 
-# --- لیبل پیام‌های خالی (Placeholder Message) ---
+# --- Empty-state placeholder label ---
 LBL_PLACEHOLDER = """
     QLabel {
         color: #666;
@@ -255,8 +255,8 @@ LBL_TASK = """
     }
 """
 
-# --- استایل‌های اختصاصی بلندر ---
-# فریم اصلی با دورخط نارنجی
+# --- Blender-specific styles ---
+# Main frame with an orange outline
 BLENDER_FRAME = """
     QFrame#MainFrame { 
         background-color: #2d2d2d; 
@@ -265,7 +265,7 @@ BLENDER_FRAME = """
     }
 """
 
-# --- جداکننده (Separator) ---
+# --- Separator ---
 SEPARATOR = """
     QFrame {
         background-color: #555;
@@ -273,7 +273,7 @@ SEPARATOR = """
     }
 """
 
-# --- دکمه بستن (Close Button) ---
+# --- Close button ---
 BTN_CLOSE = """
     QPushButton {
         background-color: transparent;
@@ -283,6 +283,6 @@ BTN_CLOSE = """
         font-size: 14px;
     }
     QPushButton:hover {
-        color: #ff5555; /* قرمز هنگام هاور */
+        color: #ff5555; /* red on hover */
     }
 """

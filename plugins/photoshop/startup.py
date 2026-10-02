@@ -5,7 +5,7 @@ import importlib
 
 def install_dependencies():
     """
-    بررسی و نصب خودکار کتابخانه‌های مورد نیاز فتوشاپ
+    Check and auto-install Photoshop Python libraries.
     """
     try:
         import photoshop
@@ -13,7 +13,7 @@ def install_dependencies():
     except ImportError:
         print(">> [Cortex] Photoshop API not found. Installing...")
         try:
-            # استفاده از sys.executable برای اطمینان از نصب در پایتونِ جاری
+            # Use sys.executable so the package lands in the current interpreter
             subprocess.check_call([sys.executable, "-m", "pip", "install", "photoshop-python-api"])
             print(">> [Cortex] Photoshop API installed successfully.")
         except Exception as e:
@@ -41,12 +41,12 @@ def init_photoshop_cortex():
 if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
     
-    # ایجاد اپلیکیشن اگر وجود نداشت (چون به صورت مستقل اجرا می‌شود)
+    # Create a QApplication when this module is run standalone
     app = QApplication.instance()
     if not app:
         app = QApplication(sys.argv)
     
     init_photoshop_cortex()
     
-    # نگه داشتن پروسه برای نمایش تولبار
+    # Keep the process alive so the toolbar stays visible
     sys.exit(app.exec())

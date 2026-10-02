@@ -15,13 +15,13 @@ class SaveWindow(QWidget):
         """
         super(SaveWindow, self).__init__(parent)
         self.setWindowTitle("Save Incremental Version")
-        self.setWindowFlags(Qt.Tool) # پنجره شناور
+        self.setWindowFlags(Qt.Tool) # Floating window
         self.resize(400, 400)
         
-        # استایل دارک
+        # Dark style
         self.setStyleSheet(style.SAVEWINDOW)
 
-        # دریافت اطلاعات پروژه
+        # Read project info
         self.work_path = os.environ.get("CORTEX_WORK_PATH", "")
         self.task_filename = os.environ.get("CORTEX_TASK_NAME", "UnknownTask")
         self.next_version = 1
@@ -37,16 +37,16 @@ class SaveWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
 
-        # 1. نمایش تامنیل (Preview)
+        # 1. Thumbnail (Preview)
         self.lbl_thumbnail = QLabel()
         self.lbl_thumbnail.setAlignment(Qt.AlignCenter)
         self.lbl_thumbnail.setStyleSheet(style.LBL_THUMBNAIL)
         self.lbl_thumbnail.setMinimumHeight(220)
-        # این ویژگی باعث می‌شود عکس فیت شود
+        # Fit the image
         self.lbl_thumbnail.setScaledContents(True) 
         layout.addWidget(self.lbl_thumbnail)
 
-        # 2. اطلاعات ورژن
+        # 2. Version info
         info_layout = QHBoxLayout()
         info_layout.addWidget(QLabel("Next Version:"))
         
@@ -56,14 +56,14 @@ class SaveWindow(QWidget):
         info_layout.addStretch()
         layout.addLayout(info_layout)
 
-        # 3. کامنت
+        # 3. Comment
         layout.addWidget(QLabel("Comment / Description:"))
         self.txt_comment = QTextEdit()
         self.txt_comment.setPlaceholderText("What did you change in this version?")
         self.txt_comment.setMaximumHeight(80)
         layout.addWidget(self.txt_comment)
 
-        # 4. دکمه ذخیره
+        # 4. Save button
         self.btn_save = QPushButton("💾 SAVE SCENE + PREVIEW")
         self.btn_save.clicked.connect(self.do_save)
         layout.addWidget(self.btn_save)
@@ -80,11 +80,11 @@ class SaveWindow(QWidget):
         
         current_max = 0
         for f in max_files:
-            # فقط فایل‌هایی که با نام تسک شروع می‌شوند را بررسی کن
+            # Only consider files that start with the task name
             if not f.startswith(self.task_filename):
                 continue
             try:
-                # فرمت: Modeling_v005.max
+                # Format: Modeling_v005.max
                 part = f.split("_v")[-1] 
                 num = part.split(".")[0]
                 if num.isdigit():
@@ -98,19 +98,19 @@ class SaveWindow(QWidget):
         self.lbl_version.setText(f"v{self.next_version:03d}")
 
     def capture_thumbnail(self):
-        """گرفتن عکس و کوچک کردن آن برای جلوگیری از بزرگ شدن پنجره"""
+        """Capture a still and shrink it so the window does not grow"""
         try:
-            # 1. گرفتن اسکرین‌شات خام (بزرگ)
+            # 1. Raw (large) screenshot
             bmp = rt.gw.getViewportDib()
             temp_path = os.path.join(os.environ["TEMP"], "cortex_temp_thumb.jpg")
             bmp.filename = temp_path
             rt.save(bmp)
             
-            # 2. لود کردن عکس در حافظه
+            # 2. Load the image in memory
             full_pixmap = QPixmap(temp_path)
             
-            # 3. --- نکته مهم: تغییر سایز عکس قبل از نمایش ---
-            # عکس را به عرض 380 پیکسل محدود می‌کنیم (ارتفاع اتوماتیک تنظیم می‌شود)
+            # 3. --- Resize before display ---
+            # Cap width at 380px (height follows)
             scaled_pixmap = full_pixmap.scaledToWidth(380, Qt.SmoothTransformation)
             
             self.lbl_thumbnail.setPixmap(scaled_pixmap)
@@ -119,50 +119,50 @@ class SaveWindow(QWidget):
             self.lbl_thumbnail.setText(f"No Preview\n{e}")
 
     def do_save(self):
-        """عملیات ذخیره نهایی (مکس + عکس + کامنت)"""
+        """Final save (Max + image + comment)"""
         if not os.path.exists(self.work_path):
             print("!! Work path not found.")
             return
 
-        # 1. ساخت نام فایل‌ها
-        # فایل مکس: Modeling_v001.max
+        # 1. Build filenames
+        # Max file: Modeling_v001.max
         base_name = f"{self.task_filename}_v{self.next_version:03d}"
         max_file = os.path.join(self.work_path, f"{base_name}.max")
-        jpg_file = os.path.join(self.work_path, f"{base_name}.jpg") # <--- فایل تصویر
-        txt_file = os.path.join(self.work_path, f"{base_name}.txt") # فایل تکست (اختیاری)
+        jpg_file = os.path.join(self.work_path, f"{base_name}.jpg") # <--- image file
+        txt_file = os.path.join(self.work_path, f"{base_name}.txt") # optional text file
 
         try:
-            # الف) ذخیره فایل مکس
+            # a) Save the Max file
             rt.saveMaxFile(max_file)
             print(f">> [Cortex] Scene Saved: {max_file}")
             
-            # ب) ذخیره تصویر (Thumbnail)
-            # عکسی که الان در پنجره میبینیم را برمیداریم و ذخیره میکنیم
+            # b) Save the thumbnail
+            # Save the image currently shown in the window
             if self.lbl_thumbnail.pixmap():
                 self.lbl_thumbnail.pixmap().save(jpg_file, "JPG")
                 print(f">> [Cortex] Preview Saved: {jpg_file}")
             
-            # ج) ذخیره کامنت (اگر کاربر چیزی نوشته بود)
+            # c) Save the comment if the user wrote one
             comment = self.txt_comment.toPlainText()
             if comment.strip():
                 with open(txt_file, "w", encoding="utf-8") as f:
                     f.write(comment)
 
-            # نمایش پیغام موفقیت و بستن پنجره
+            # Success message and close
             # QMessageBox.information(self, "Success", f"Version v{self.next_version:03d} Saved Successfully!")
             self.close()
             
-            # رفرش کردن تولبار اصلی (خیلی مهم)
-            # این خط باعث می‌شود لیست ورژن‌ها در نوار ابزار بالا آپدیت شود
+            # Refresh the main toolbar (important)
+            # Updates the version list on the toolbar
             try:
                 import cortex_ui
-                # پیدا کردن نمونه باز شده و رفرش کردن آن
+                # Find the open instance and refresh it
                 main_win = cortex_ui.qtmax.GetQMaxMainWindow()
                 dock = main_win.findChild(cortex_ui.QDockWidget, "CortexDockWidget")
                 if dock:
-                    # دسترسی به متد refresh_versions داخل کلاس CortexDockWidget
-                    # چون dock خودش QDockWidget است، باید ویجت داخلی یا خود کلاس را پیدا کنیم
-                    # (این بخش کمی تریکی است، فعلا ساده رها می‌کنیم تا ارور ندهد)
+                    # Call refresh_versions on CortexDockWidget
+                    # The dock is a QDockWidget; find the inner widget or the class
+                    # (A bit tricky; leave it simple so it does not error)
                     pass 
             except:
                 pass

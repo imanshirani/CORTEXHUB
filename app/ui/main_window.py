@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt
 from app.core import config
 from app.ui import style
 from app.ui.components.sidebar import Sidebar
-# ایمپورت صفحات
+# Import pages
 from app.ui.views.dashboard_view import DashboardView
 from app.ui.views.users_view import UsersView
 from app.ui.views.projects_view import ProjectsView
@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         height = int(screen.height() * 0.85)
         self.resize(width, height)
         self.setMinimumSize(1000, 600)
-        self.setStyleSheet(style.DARK_THEME) # استایل کلی
+        self.setStyleSheet(style.DARK_THEME) # General style
         
         # Main Layout
         central_widget = QWidget()
@@ -63,10 +63,10 @@ class MainWindow(QMainWindow):
         self.dashboard_view.go_to_task_signal.connect(self.navigate_to_task)
 
         # --- Add to Stack (ORDER MATTERS!) ---
-        # ترتیب باید دقیقاً مثل سایدبار باشد:
+        # The order should be exactly like the sidebar:
         self.stack.addWidget(self.dashboard_view)  # Index 0
         self.stack.addWidget(self.projects_view)   # Index 1
-        self.stack.addWidget(self.assets_view)     # Index 2 (جدید)
+        self.stack.addWidget(self.assets_view)     # Index 2 (new)
         self.stack.addWidget(self.production_view) # Index 3
         self.stack.addWidget(self.studio_view)     # Index 4
         self.stack.addWidget(self.users_view)      # Index 5
@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         """
         self.stack.setCurrentIndex(index)
         
-        # رفرش کردن دیتا وقتی وارد صفحه می‌شویم (اختیاری ولی پیشنهادی)
+        # Refresh data when entering the page (optional but recommended)
         if index == 1: # Projects
             self.projects_view.load_projects()
         elif index == 2: # Assets
@@ -101,50 +101,50 @@ class MainWindow(QMainWindow):
         """
         Handle Logout operation.
         """
-        self.logout_requested = True # <--- این خط حیاتی است
+        self.logout_requested = True # <--- This is the life line
         self.close()
 
     def setup_sidebar(self):
-        """ساخت منوی سمت چپ با دکمه خروج"""
+        """Create a left menu with an exit button"""
         sidebar_container = QWidget()
-        sidebar_container.setFixedWidth(220) # کمی عریض‌تر برای زیبایی
+        sidebar_container.setFixedWidth(220) # A little wider for beauty
         sidebar_container.setStyleSheet(style.SIDEBAR_CONTAINER)
         
         sidebar_layout = QVBoxLayout(sidebar_container)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         
-        # الف) لوگو
+        # A) Logo
         app_logo = QLabel(f"{config.APP_NAME}")
         app_logo.setStyleSheet(style.SIDEBAR_LOGO)
         app_logo.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(app_logo)
 
-        # ب) لیست منوها
+        # b) List of menus
         self.menu_list = QListWidget()
         self.menu_list.setStyleSheet(style.SIDEBAR_MENU)
-        self.menu_list.currentRowChanged.connect(self.switch_view) # اتصال به تغییر صفحه
+        self.menu_list.currentRowChanged.connect(self.switch_view) # Connect to change page
         sidebar_layout.addWidget(self.menu_list)
         
-        # ج) فاصله انداز (Spacer) برای هل دادن دکمه خروج به پایین
+        # c) Spacer to push the exit button down
         sidebar_layout.addStretch()
 
-        # د) دکمه خروج
+        # D) Exit button
         self.btn_logout = QPushButton("Logout")
         self.btn_logout.setCursor(Qt.PointingHandCursor)
         self.btn_logout.setStyleSheet(style.LOGOUT_BUTTON)
-        self.btn_logout.clicked.connect(self.do_logout) # اتصال عملکرد خروج
+        self.btn_logout.clicked.connect(self.do_logout) # Connect exit function
         sidebar_layout.addWidget(self.btn_logout)
         
-        # اضافه کردن کل ستون سمت چپ به لایوت اصلی
+        # Add the entire left column to the main layout
         self.layout.addWidget(sidebar_container)
 
     def init_views(self):
-        """ساخت صفحات بر اساس دسترسی کاربر"""
-        # همه داشبورد را دارند
+        """Creating pages based on user access"""
+        # Everyone has a dashboard
         self.dashboard_view = DashboardView(self.session)
         self.add_menu_item("Dashboard", self.dashboard_view)
 
-        # دسترسی‌های مدیریتی
+        # Administrative access
         if self.user.role in ["admin", "supervisor"]:
             self.projects_view = ProjectsView(self.session)
             self.add_menu_item("Projects Manager", self.projects_view)
@@ -166,7 +166,7 @@ class MainWindow(QMainWindow):
 
         self.settings_view = SettingsView(self.session)
         self.add_menu_item("Settings", self.settings_view)
-        # انتخاب پیش‌فرض صفحه اول
+        # Select the default front page
         self.menu_list.setCurrentRow(0)
 
     def add_menu_item(self, name, widget):
@@ -177,31 +177,31 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(widget)
 
     def switch_view(self, index):
-        """تغییر صفحه در StackedWidget"""
+        """Change page in StackedWidget"""
         self.content_area.setCurrentIndex(index)
 
     def do_logout(self):
-        """درخواست خروج و بستن پنجره"""
+        """Request to exit and close the window"""
         confirm = QMessageBox.question(self, "Logout", "Are you sure you want to logout?", 
                                        QMessageBox.Yes | QMessageBox.No)
         if confirm == QMessageBox.Yes:
-            self.logout_requested = True # سیگنال به main.py
+            self.logout_requested = True # signal to main.py
             self.close()
 
     def navigate_to_task(self, task_id, entity_type, entity_id):
-        """تغییر تب و پرش اتوماتیک به تسک انتخاب شده در داشبورد"""
-        # 1. دریافت کانتکست (اطلاعات کامل مسیر پروژه) از دیتابیس
+        """Changing the tab and automatically jumping to the selected task in the dashboard"""
+        # 1. Get the context (complete information about the project path) from the database
         ctx = self.session.db.get_task_context_data(task_id)
         if not ctx: return
 
         if entity_type == "Shot":
-            # رفتن به تب Production (ایندکس 3)
+            # Go to the Production tab (index 3)
             self.switch_page(3)
-            # فراخوانی متد پرش در داخل خود صفحه
+            # Calling the jump method inside the page itself
             self.production_view.jump_to_task(ctx)
             
         elif entity_type == "Asset":
-            # رفتن به تب Assets (ایندکس 2)
+            # Go to the Assets tab (Index 2)
             self.switch_page(2)
-            # فراخوانی متد پرش در داخل خود صفحه
+            # Calling the jump method inside the page itself
             self.assets_view.jump_to_task(ctx)

@@ -2,39 +2,39 @@
 import hou
 
 def create_cortex_node():
-    """ساخت خودکار نود اختصاصی کورتکس با پارامترهای حرفه‌ای"""
+    """Create a Cortex node with pipeline parameters"""
     
-    # ۱. ایجاد نود پایه در محیط OBJ
+    # 1. Base node in OBJ
     obj = hou.node("/obj")
     node = obj.createNode("geo", "CORTEX_PUBLISHER")
     
-    # ۲. ظاهر نود (رنگ آبی کورتکس)
+    # 2. Node look (Cortex blue)
     node.setColor(hou.Color((0, 0.47, 0.8)))
 
-    # ۳. دریافت گروه پارامترهای پیش‌فرض و مخفی کردن تک‌تک آن‌ها
+    # 3. Hide default parameter groups one by one
     group = node.parmTemplateGroup()
     for pt in group.parmTemplates():
         pt.hide(True)
         group.replace(pt.name(), pt)
 
-    # ۴. ساخت یک تب (فولدر) اختصاصی و شیک برای کورتکس
+    # 4. Dedicated Cortex folder/tab
     cortex_folder = hou.FolderParmTemplate("cortex_folder", "Cortex Pipeline")
 
-    # فیلد انتخاب نود هدف (Target Node)
+    # Target node field
     target_path = hou.StringParmTemplate("target_node", "Target Object", 1, string_type=hou.stringParmType.NodeReference)
     cortex_folder.addParmTemplate(target_path)
 
-    # منوی انتخاب نوع خروجی
+    # Output-type menu
     out_type = hou.MenuParmTemplate("out_type", "Output Type", 
                                     menu_items=["vdb", "abc", "usd"],
                                     menu_labels=["VDB Cache (.vdb)", "Alembic (.abc)", "USD (.usd)"])
     cortex_folder.addParmTemplate(out_type)
 
-    # فیلد کامنت
+    # Comment field
     comment = hou.StringParmTemplate("comment", "Comment", 1)
     cortex_folder.addParmTemplate(comment)
 
-    # --- ساخت دکمه PUBLISH و تزریق Callback Script ---
+    # --- PUBLISH button and callback script ---
     callback_code = """
 import publisher_houdini
 import importlib
@@ -47,10 +47,10 @@ publisher_houdini.run_publish_logic(node)
     publish_btn.setScriptCallbackLanguage(hou.scriptLanguage.Python)
     cortex_folder.addParmTemplate(publish_btn)
 
-    # ۵. اضافه کردن تب کورتکس به نود
+    # 5. Add the Cortex tab to the node
     group.append(cortex_folder)
 
-    # ۶. اعمال نهایی روی نود
+    # 6. Apply on the node
     node.setParmTemplateGroup(group)
 
     print(f">> [Cortex] Specialized Node Created: {node.path()}")
@@ -58,28 +58,28 @@ publisher_houdini.run_publish_logic(node)
 
 
 def create_cortex_loader_node():
-    """ساخت خودکار نود اختصاصی کورتکس برای لود کردن اَسِت‌ها"""
+    """Create a Cortex loader node for assets"""
     
     obj = hou.node("/obj")
     node = obj.createNode("geo", "CORTEX_LOADER")
     
-    # ظاهر نود لودر (رنگ نارنجی کورتکس)
+    # Loader look (Cortex orange)
     node.setColor(hou.Color((0.9, 0.4, 0.1)))
 
-    # مخفی کردن پارامترهای پیش‌فرض geo
+    # Hide default geo parameters
     group = node.parmTemplateGroup()
     for pt in group.parmTemplates():
         pt.hide(True)
         group.replace(pt.name(), pt)
 
-    # ساخت تب اختصاصی لودر
+    # Loader tab
     cortex_folder = hou.FolderParmTemplate("cortex_loader_folder", "Cortex Pipeline (LOADER)")
 
-    # فیلد انتخاب فایل از هارد (File Browser)
+    # File browser on disk
     file_path = hou.StringParmTemplate("file_path", "Select File (.abc, .vdb)", 1, string_type=hou.stringParmType.FileReference)
     cortex_folder.addParmTemplate(file_path)
 
-    # --- ساخت دکمه LOAD ---
+    # --- LOAD button ---
     callback_code = """
 import loader_houdini
 import importlib
@@ -92,7 +92,7 @@ loader_houdini.run_load_logic(node)
     load_btn.setScriptCallbackLanguage(hou.scriptLanguage.Python)
     cortex_folder.addParmTemplate(load_btn)
 
-    # اعمال روی نود
+    # Apply on the node
     group.append(cortex_folder)
     node.setParmTemplateGroup(group)
 

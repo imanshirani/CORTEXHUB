@@ -27,7 +27,7 @@ class BlenderPublisher:
 
     def get_3d_view_context(self):
         """
-        یافتن پنجره و ناحیه سه بعدی معتبر برای اجرای دستورات
+        Find a valid window and 3D region for operators
         """
         for window in bpy.context.window_manager.windows:
             screen = window.screen
@@ -46,47 +46,45 @@ class BlenderPublisher:
             QMessageBox.critical(None, "Error", "No Context. Please use Loader.")
             return
 
-        # 1. دریافت اطلاعات تسک
+        # 1. Task info
         task_data = self.db.get_task_by_id(self.task_id)
         dept_name = task_data[2].lower() if task_data else "general"
         
-        # 2. دریافت تنظیمات بلندر (چک‌باکس‌ها)
+        # 2. Blender settings (checkboxes)
         blender_opts = self.get_blender_options(dept_name)
 
         class MockSession:
-            def __init__(self, db): self.db = db
-                """
-                Handle   Init   operation.
-                """
+            def __init__(self, db):
+                self.db = db
         session = MockSession(self.db)
 
-        # 3. گرفتن عکس (اول این کار را انجام می‌دهیم)
+        # 3. Take the still first
         temp_thumb = None 
-        # مسیر عکس موقت
+        # Temp image path
         temp_thumb_path = os.path.join(os.environ["TEMP"], "cortex_blend_preview.jpg")
         
         window, screen, area, region = self.get_3d_view_context()
         
         if window and area:
             try:
-                # ذخیره تنظیمات فعلی رندر
+                # Store current render settings
                 scene = window.scene
                 old_filepath = scene.render.filepath
                 old_format = scene.render.image_settings.file_format
                 
-                # تنظیم برای گرفتن عکس
+                # Configure for a still
                 scene.render.image_settings.file_format = 'JPEG'
                 scene.render.filepath = temp_thumb_path
                 
-                # گرفتن عکس با override
+                # Capture with override
                 with bpy.context.temp_override(window=window, screen=screen, area=area, region=region):
                     bpy.ops.render.opengl(write_still=True)
                 
-                # بررسی اینکه آیا عکس واقعا ساخته شده؟
+                # Confirm the image was written
                 if os.path.exists(temp_thumb_path):
                     temp_thumb = temp_thumb_path
                 
-                # بازگرداندن تنظیمات
+                # Restore settings
                 scene.render.filepath = old_filepath
                 scene.render.image_settings.file_format = old_format
                 
@@ -96,7 +94,7 @@ class BlenderPublisher:
         else:
             print(">> [Cortex Warning] No 3D View found for thumbnail.")
 
-        # 4. ساخت و نمایش دیالوگ (حالا temp_thumb مقدار دارد)
+        # 4. Build and show the dialog (temp_thumb is set)
         self.dialog = PublishDialog(
             session, 
             self.task_id, 
@@ -106,21 +104,21 @@ class BlenderPublisher:
         )
         self.dialog.setStyleSheet(style.PUBLISH_DIALOG)
         
-        # تغییر تایتل اگر لازم بود
+        # Change the title if needed
         if "lookdev" in dept_name:
             self.dialog.setWindowTitle("💎 Lookdev Master Publish")
         elif "model" in dept_name:
             self.dialog.setWindowTitle("📦 Modeling Publish")
 
-        # 5. اجرای دیالوگ
+        # 5. Run the dialog
         if self.dialog.exec():
             data = self.dialog.get_data()
             
-            # اول ولیدیشن
+            # Validation first
             if self.validate(data) is False:
                 return
 
-            # دوم اجرای پروسه
+            # Then the publish
             if "lookdev" in dept_name:
                 self.run_lookdev_process(data)
             else:
@@ -129,11 +127,11 @@ class BlenderPublisher:
     
 
     def get_publish_root(self):
-        """یافتن ریشه اَسِت در ساختار بلندر: Work/blender/Dept/Task"""
+        """Find the asset root in the Blender layout: Work/blender/Dept/Task"""
         if not self.work_path: return ""
         parts = self.work_path.replace("\\", "/").split("/")
         try:
-            # پیدا کردن پوشه Work و برگشت به ۳ مرحله قبل
+            # Find the Work folder and walk three levels up
             for i, p in enumerate(parts):
                 if p.lower() == "work":
                     return "/".join(parts[:i])
@@ -141,7 +139,7 @@ class BlenderPublisher:
         return self.work_path
     
     def get_blender_options(self, dept_name):
-        """ساخت لیست خروجی‌ها بر اساس دپارتمان برای بلندر"""
+        """Build the output list from the department for Blender"""
         options = []
         is_lookdev = "lookdev" in dept_name
         
@@ -194,11 +192,11 @@ class BlenderPublisher:
 
         published_files = {}
         
-        # 1. دریافت کانتکست صحیح
+        # 1. Correct context
         window, screen, area, region = self.get_3d_view_context()
         
-        # 2. ساخت دیکشنری برای temp_override
-        # فقط در صورتی که پنجره و ناحیه پیدا شده باشند مقداردهی می‌شود
+        # 2. Dict for temp_override
+        # Only fill it if window and region were found
         override_args = {}
         if window and area:
             override_args = {
@@ -225,10 +223,10 @@ class BlenderPublisher:
                 dest_obj = os.path.join(entity_root, "3d", "obj")
                 if not os.path.exists(dest_obj): os.makedirs(dest_obj)
                 
-                # استخراج نام اَسِت (مثلاً Hero)
+                # Asset name (e.g. Hero)
                 asset_name = os.path.basename(entity_root)
                 
-                # نام جدید: Hero_Head_v002.fbx
+                # New name: Hero_Head_v002.fbx
                 fbx_name = f"{asset_name}_{os.path.splitext(os.path.basename(current_file))[0]}.fbx"
                 fbx_path = os.path.join(dest_obj, fbx_name)
                 
@@ -269,7 +267,7 @@ class BlenderPublisher:
                         bpy.ops.render.opengl(animation=True)
                     published_files['playblast'] = vid_path
                 
-                # بازگرداندن تنظیمات
+                # Restore settings
                 bpy.context.scene.render.filepath = old_fp
                 bpy.context.scene.render.image_settings.file_format = old_fmt
 
@@ -304,13 +302,13 @@ class BlenderPublisher:
             import traceback
             traceback.print_exc()
     def export_lookdev_assets(self):
-        """فراخوانی سیستم بسته‌بندی متریال بلندر"""
+        """Call the Blender material packager"""
         try:
             import publisher_mat_blender
             import importlib
             importlib.reload(publisher_mat_blender)
             
-            # ارسال مسیر ریشه اَسِت به پابلیشر متریال
+            # Pass the asset root to the material publisher
             mat_pub = publisher_mat_blender.BlenderMaterialPublisher(self.get_publish_root())
             mat_pub.publish()
             
@@ -319,24 +317,24 @@ class BlenderPublisher:
 
         
     def run_lookdev_publish(self, data):
-        """پابلیش متریال‌ها فقط در صورت نیاز (مشابه متد مکس)"""
-        # ۱. چک کردن اینکه آیا کاربر تیک متریال را زده یا نه (از طریق رابط کاربری)
+        """Publish materials only when needed (same as Max)"""
+        # 1. Did the user tick materials in the UI?
         if 'materials' not in data['outputs']:
             return
 
         print(">> [Cortex] Publishing Blender Native Materials...")
         
-        # ۲. پیدا کردن ریشه اَسِت و ساخت مسیر publish/lookdev
+        # 2. Find the asset root and build publish/lookdev
         entity_root = self.get_publish_root()
         mat_path = os.path.join(entity_root, "publish", "lookdev", "materials")
         if not os.path.exists(mat_path): os.makedirs(mat_path)
 
-        # ۳. ذخیره متریال‌ها در یک فایل مجزا (Native)
-        # این فایل سبک است و فقط شامل دیتای شیدرهاست
+        # 3. Save materials in a separate native file
+        # Light file: shader data only
         filename = f"{os.path.basename(entity_root)}_mat_lib.blend"
         full_path = os.path.join(mat_path, filename)
         
-        # ذخیره فقط دیتابلاک‌های متریال
+        # Save material datablocks only
         bpy.ops.wm.save_as_mainfile(filepath=full_path, copy=True)
 
     def version_up_work_file(self, current_path):
@@ -368,28 +366,28 @@ class BlenderPublisher:
         Handle Validate operation.
         """
         project_id = os.environ.get("CORTEX_PROJECT_ID")
-        # دریافت قوانین به همراه متن اسکریپت از دیتابیس
+        # Load rules including the script text from the database
         rules = self.db.get_validation_rules_with_scripts(project_id, self.software)
         
         self.errors = []
         self.warnings = []
 
         for rule in rules:
-            # دیکشنری rule باید شامل 'rule_script' و 'is_mandatory' و 'rule_key' باشد
+            # rule dict needs rule_script, is_mandatory, and rule_key
             script_content = rule.get('rule_script')
             if not script_content:
                 continue
 
-            # محیط اجرای اسکریپت
+            # Script execution namespace
             local_vars = {
                 "self": self, 
                 "is_mandatory": rule.get('is_mandatory', 1),
-                "errors": self.errors,     # پاس دادن مستقیم لیست خطاها
-                "warnings": self.warnings  # پاس دادن مستقیم لیست هشدارها
+                "errors": self.errors,     # Pass the error list through
+                "warnings": self.warnings  # Pass the warning list through
             }
             
             try:
-                # اجرای اسکریپت ذخیره شده در دیتابیس
+                # Run the script stored in the database
                 exec(script_content, {}, local_vars)
             except Exception as e:
                 self.errors.append(f"Validator Error ({rule.get('rule_key')}): {str(e)}")
@@ -397,8 +395,8 @@ class BlenderPublisher:
         return self._show_validation_results()
     
     def _validate_naming(self, is_mandatory):
-        """چک کردن ورژن در نام فایل (مشترک)"""
-        # تشخیص مسیر فایل بر اساس نرم‌افزار
+        """Check that the filename contains a version (shared)"""
+        # Detect the file path from the DCC
         if self.software == "max":
             import pymxs
             current_file = pymxs.runtime.maxFileName
@@ -412,7 +410,7 @@ class BlenderPublisher:
             else: self.warnings.append(msg)
 
     def _show_validation_results(self):
-        """نمایش نهایی پیام‌ها به کاربر"""
+        """Show the final messages to the user"""
         if self.errors:
             QMessageBox.critical(None, "Validation Failed", "\n".join(self.errors))
             return False
@@ -424,7 +422,7 @@ class BlenderPublisher:
         return True
     
     def _validate_blender_scale(self, is_mandatory):
-        """چک کردن اپلای بودن اسکیل در بلندر"""
+        """Check that scale is applied in Blender"""
         import bpy
         for obj in bpy.context.selected_objects:
             if any(abs(s - 1.0) > 0.001 for s in obj.scale):

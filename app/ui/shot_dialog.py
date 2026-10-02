@@ -38,7 +38,7 @@ class ShotDialog(QDialog):
         self.start_spin.setRange(0, 1000000)
         self.start_spin.setValue(1001)
         self.start_spin.setStyleSheet(style.SPINBOX_STYLE)
-        s_layout.addWidget(self.start_spin) # این خط بود
+        s_layout.addWidget(self.start_spin) # This was the line
         
         # End Frame
         e_layout = QVBoxLayout()
@@ -48,7 +48,7 @@ class ShotDialog(QDialog):
         self.end_spin.setValue(1100)
         self.end_spin.setStyleSheet(style.SPINBOX_STYLE)
         
-        # ++++++ این خط جا افتاده بود! ++++++
+        # ++++++ This line was fixed! ++++++
         e_layout.addWidget(self.end_spin) 
         # +++++++++++++++++++++++++++++++++++
         

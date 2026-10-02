@@ -13,11 +13,11 @@ class ProjectsView(QWidget):
         """
         Handle On Project Clicked operation.
         """
-        # پیدا کردن آیدی پروژه انتخاب شده از جدول
+        # Find the selected project id from the table
         row = self.table.currentRow()
         project_id = self.table.item(row, 0).text() 
         
-        # ارسال سیگنال به تمام برنامه‌
+        # Broadcast a signal to the rest of the app
         self.project_selected.emit(project_id)
         
     def __init__(self, session):
@@ -29,18 +29,18 @@ class ProjectsView(QWidget):
         
         layout = QVBoxLayout(self)
         
-        # 1. تنظیم فاصله از لبه‌ها (مثل صفحه یوزر)
+        # 1. Set margins from the edges (same as the users page)
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(20)
         
         # --- Header ---
         header_layout = QHBoxLayout()
         
-        # تیتر
+        # Title
         title = QLabel("Active Projects")
         title.setStyleSheet(style.PROJECTS_TITLE)
         
-        # دکمه سبز
+        # Green button
         self.btn_add = QPushButton("+ New Project")
         self.btn_add.setFixedSize(120, 35)
         self.btn_add.setCursor(Qt.PointingHandCursor)
@@ -58,28 +58,28 @@ class ProjectsView(QWidget):
         self.table.setHorizontalHeaderLabels(["Project Name", "Code", "Root Path", "Status", "Actions"])
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         
-        # --- 2. تنظیم دقیق عرض ستون‌ها (FIX اصلی) ---
+        # --- 2. Exact column widths (main fix) ---
         header = self.table.horizontalHeader()
         
-        # ستون‌های متنی که باید کش بیایند (Name, Path)
+        # Stretching text columns (Name, Path)
         header.setSectionResizeMode(0, QHeaderView.Stretch) # Name
         header.setSectionResizeMode(2, QHeaderView.Stretch) # Path
         
-        # ستون‌های با عرض ثابت (Code, Status, Actions)
+        # Fixed-width columns (Code, Status, Actions)
         header.setSectionResizeMode(1, QHeaderView.Fixed)
-        self.table.setColumnWidth(1, 80)  # عرض کم برای کد (مثلاً TTN)
+        self.table.setColumnWidth(1, 80)  # Narrow width for the code (e.g. TTN)
         
         header.setSectionResizeMode(3, QHeaderView.Fixed)
-        self.table.setColumnWidth(3, 100) # عرض ثابت برای وضعیت
+        self.table.setColumnWidth(3, 100) # Fixed width for status
         
-        # ستون اکشن‌ها (حیاتی‌ترین بخش)
-        # ما 3 دکمه داریم: 70+60+50 + فاصله‌ها = حدود 220 پیکسل نیاز داریم
+        # Actions column (most important)
+        # Three buttons: 70+60+50 plus gaps ~= 220px
         header.setSectionResizeMode(4, QHeaderView.Fixed)
         self.table.setColumnWidth(4, 240) 
         
-        # ارتفاع ردیف
+        # Row height
         self.table.verticalHeader().setDefaultSectionSize(50)
-        self.table.verticalHeader().setVisible(True) # شماره ردیف شاید شلوغش کرده، فعلا مخفی (مثل یوزر منیجمنت)
+        self.table.verticalHeader().setVisible(True) # Row numbers clutter the table; hide like user management
         
         self.table.setStyleSheet(style.PROJECTS_TABLE)
         
@@ -99,7 +99,7 @@ class ProjectsView(QWidget):
             # 1. Name
             self.table.setItem(row_idx, 0, QTableWidgetItem(proj.name))
             
-            # 2. Code (وسط چین)
+            # 2. Code (center aligned)
             code_item = QTableWidgetItem(proj.code)
             code_item.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row_idx, 1, code_item)
@@ -107,7 +107,7 @@ class ProjectsView(QWidget):
             # 3. Path
             self.table.setItem(row_idx, 2, QTableWidgetItem(proj.root_path))
             
-            # 4. Status (وسط چین)
+            # 4. Status (center aligned)
             status = getattr(proj, 'status', 'Active') 
             status_item = QTableWidgetItem(status)
             status_item.setTextAlignment(Qt.AlignCenter)
@@ -117,14 +117,14 @@ class ProjectsView(QWidget):
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
             
-            # تنظیم مارجین صفر تا دکمه‌ها دقیق وسط بیفتند و جای اضافی نگیرند
+            # Zero margins so buttons sit centered without extra space
             actions_layout.setContentsMargins(0, 0, 0, 0)
             actions_layout.setSpacing(5) 
-            actions_layout.setAlignment(Qt.AlignCenter) # وسط چین کردن کل دکمه‌ها در سلول
+            actions_layout.setAlignment(Qt.AlignCenter) # Center all buttons in the cell
             
             # Members
             btn_members = QPushButton("Members")
-            btn_members.setFixedSize(70, 28) # کمی ارتفاع را بیشتر کردم
+            btn_members.setFixedSize(70, 28) # Slightly taller
             btn_members.setCursor(Qt.PointingHandCursor)
             btn_members.setStyleSheet(style.BTN_ACTION_MEMBERS)
             btn_members.clicked.connect(lambda _, p=proj: self.open_members_dialog(p))
@@ -149,7 +149,7 @@ class ProjectsView(QWidget):
             
             self.table.setCellWidget(row_idx, 4, actions_widget)
 
-    # ... (توابع open_add_dialog, open_edit_dialog, delete_project, open_members_dialog بدون تغییر) ...
+    # ... (open_add_dialog, open_edit_dialog, delete_project, open_members_dialog unchanged) ...
     def open_add_dialog(self):
         """
         Handle Open Add Dialog operation.

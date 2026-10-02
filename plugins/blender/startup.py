@@ -16,7 +16,7 @@ def install_and_launch():
     """
     Handle Install And Launch operation.
     """
-    # 1. تنظیمات صحنه
+    # 1. Scene settings
     try: bpy.context.scene.render.fps = int(CortexState.fps)
     except: pass
     try:
@@ -24,14 +24,14 @@ def install_and_launch():
         bpy.context.scene.render.resolution_y = int(CortexState.res_h)
     except: pass
 
-    # 2. چک کردن PySide6
+    # 2. Check PySide6
     try:
         import PySide6
     except ImportError:
         print(">> Installing PySide6...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyside6"])
 
-    # 3. اجرای UI شناور
+    # 3. Floating UI
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         if current_dir not in sys.path: sys.path.append(current_dir)
@@ -43,6 +43,6 @@ def install_and_launch():
     except Exception as e:
         print(f"!! UI Error: {e}")
 
-# اجرای خودکار با کمی تاخیر تا بلندر کامل لود شود
+# Auto-run after a short delay so Blender is fully up
 if __name__ == "__main__":
     bpy.app.timers.register(install_and_launch, first_interval=1.0)

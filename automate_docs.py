@@ -23,14 +23,14 @@ def add_smart_docs(root_dirs):
                     for i, line in enumerate(lines):
                         new_lines.append(line)
                         
-                        # شناسایی توابع برای اضافه کردن داکیومنت
+                        # Identify functions for adding documents
                         if 'def ' in line and ':' in line:
-                            # چک کردن اینکه خط بعدی خودش داکیومنت نباشد
+                            # Checking that the next line is not a document itself
                             if i + 1 < len(lines) and '"""' not in lines[i+1]:
                                 indent = line[:line.find('def')]
                                 func_name = line.split('def ')[1].split('(')[0]
                                 
-                                # ساخت یک توضیح ساده بر اساس اسم تابع
+                                # Create a simple description based on the function name
                                 clean_name = func_name.replace('_', ' ').title()
                                 doc = f'{indent}    """\n{indent}    Handle {clean_name} operation.\n{indent}    """\n'
                                 
@@ -43,7 +43,7 @@ def add_smart_docs(root_dirs):
                         print(f"✅ Documented: {folder}/{file}")
 
 if __name__ == "__main__":
-    # فقط پوشه‌هایی که کد پایتون دارند را اسکن می‌کنیم
+    # We only scan folders that contain Python code
     folders_to_scan = ["app", "plugins"]
     print("🚀 Starting Cortex Auto-Doc...")
     add_smart_docs(folders_to_scan)

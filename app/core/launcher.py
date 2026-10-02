@@ -40,7 +40,7 @@ class BaseLauncher:
         self.session = session
         self.env = os.environ.copy()
         self.software_dir = "common"
-        # تعریف ریشه پروژه برای استفاده در تمام لانچرها
+        # Define project root for use in all launchers
         current_file_path = os.path.abspath(__file__) # app/core/launcher.py
         self.root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
 
@@ -152,17 +152,17 @@ class MaxLauncher(BaseLauncher):
         """
         Handle Launch operation.
         """
-        # ۱. چک کردن قفل نرم‌افزار (اگر مکس مجاز نباشد، کلاً اجرا نشو)
+        # 1. Software lock check (if Max is not allowed, don't run at all)
         if self.allowed_sw.lower() != "all" and "max" not in self.allowed_sw.lower():
             return False, f"❌ Access Denied! This task is locked to: {self.allowed_sw.upper()}"
 
-        # ۲. پیدا کردن مسیر EXE
+        # 2. Find the EXE path
         settings = QSettings("Cortex", "Pipeline")
         exe_path = settings.value("max_path", "")
         if not exe_path or not os.path.exists(exe_path):
             return False, "3ds Max path is not set."
 
-        # ۳. پیدا کردن اسکریپت استارتاپ
+        # 3. Find the startup script
         current_file_path = os.path.abspath(__file__)
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
         script_path = os.path.join(root_dir, "plugins", "3dsmax", "startup.py")
@@ -186,7 +186,7 @@ class MayaLauncher(BaseLauncher):
         self.software_dir = "maya"
 
     def launch(self):
-        # چک کردن قفل نرم‌افزاری از دیتابیس
+        # Checking the software lock from the database
         if self.allowed_sw.lower() != "all" and "maya" not in self.allowed_sw.lower():
             return False, f"❌ Access Denied! Task locked to: {self.allowed_sw.upper()}"
 
@@ -196,19 +196,19 @@ class MayaLauncher(BaseLauncher):
         if not exe_path or not os.path.exists(exe_path):
             return False, "Maya path is not set in Settings > Utilities."
 
-        # پیدا کردن مسیر دقیق پوشه plugins/maya در کورتکس
+        # Find the exact path of the plugins/maya folder in Cortex
         current_file_path = os.path.abspath(__file__)
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
         maya_plugin_dir = os.path.join(root_dir, "plugins", "maya").replace("\\", "/")
 
-        # --- این دو خط جادویی هستند! ---
-        # اضافه کردن مسیر پلاگین به متغیر پایتونِ مایا
+        # --- These two lines are magic! ---
+        # Add plugin path to Maya Python variable
         existing_python_path = self.env.get("PYTHONPATH", "")
         self.env["PYTHONPATH"] = maya_plugin_dir + os.pathsep + existing_python_path
         # -------------------------------
 
         try:
-            # حالا مایا را با این تنظیمات جدید باز می‌کنیم
+            # Now open Maya with these new settings
             subprocess.Popen([exe_path], env=self.env)
             return True, "Maya Launched with Cortex Pipeline!"
         except Exception as e:
@@ -225,41 +225,41 @@ class HoudiniLauncher(BaseLauncher):
         self.software_dir = "houdini"
 
     def launch(self):
-        # ۱. بررسی اجازه دسترسی (قفل دپارتمان)
+        # 1. Check access permission (department lock)
         if self.allowed_sw.lower() != "all" and "houdini" not in self.allowed_sw.lower():
             return False, f"❌ Access Denied! Task locked to: {self.allowed_sw.upper()}"
 
-        # ۲. خواندن مسیر EXE از تنظیمات لوکال
+        # 2. Reading the EXE path from local settings
         settings = QSettings("Cortex", "Pipeline")
         exe_path = settings.value("houdini_path", "")
         
         if not exe_path or not os.path.exists(exe_path):
             return False, "Houdini path is not set in Settings > Utilities."
 
-        # ۳. پیدا کردن مسیر ریشه پروژه برای آدرس‌دهی پلاگین‌ها
+        # 3. Find the root path of the project to address the plugins
         current_file_path = os.path.abspath(__file__)
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
         houdini_plugin_dir = os.path.join(root_dir, "plugins", "houdini")
 
-        # ۴. تنظیم متغیرهای محیطی اختصاصی هودینی
-        # معرفی مسیر پلاگین به عنوان ریشه برای هودینی
+        # 4. Houdini specific environment variable setting
+        # Introducing the plugin path as the root for Houdini
         self.env["CORTEX_HOUDINI"] = houdini_plugin_dir
         
-        # معرفی مسیر اسکریپت‌ها به پایتونِ هودینی (برای شناسایی publisher_houdini.py)
+        # Introducing the script path to Houdini Python (to identify publisher_houdini.py)
         scripts_path = os.path.join(houdini_plugin_dir, "scripts")
         self.env["PYTHONPATH"] = scripts_path + os.pathsep + self.env.get("PYTHONPATH", "")
 
-        # ست کردن JOB برای دسترسی به فایل‌ها با علامت $JOB در هودینی
+        # Set JOB to access files marked $JOB in Houdini
         self.env["JOB"] = self.work_path 
         
-        # معرفی مسیر پکیج‌های هودینی (برای لود شدن خودکار شلف و تنظیمات)
+        # Introducing the path of Houdini packages (for automatic loading of the shelf and settings)
         self.env["HOUDINI_PACKAGE_DIR"] = houdini_plugin_dir
         
-        # باز کردن کنسول هودینی برای مشاهده لاگ‌های کورتکس
+        # Open the Houdini console to view Cortex logs
         self.env["HOUDINI_WINDOW_CONSOLE"] = "1"
         
         try:
-            # ۵. اجرای هودینی با محیط ایزوله شده (env)
+            # 5. Running Houdini with an isolated environment (env)
             subprocess.Popen([exe_path], env=self.env)
             return True, "Houdini Launched with Cortex Professional Engine!"
         except Exception as e:
@@ -274,7 +274,7 @@ class BlenderLauncher(BaseLauncher):
         Handle   Init   operation.
         """
         super().__init__(session)
-        self.software_dir = "blender" # نام فولدر در مسیر ورک
+        self.software_dir = "blender" # The name of the folder in the work path
 
     def launch(self):
         """
@@ -283,32 +283,32 @@ class BlenderLauncher(BaseLauncher):
         if self.allowed_sw.lower() != "all" and "blender" not in self.allowed_sw.lower():
             return False, f"❌ Access Denied! This task is locked to: {self.allowed_sw.upper()}"
 
-        # 1. گرفتن مسیر فایل exe
+        # 1. Getting the path of the exe file
         settings = QSettings("Cortex", "Pipeline")
         exe_path = settings.value("blender_path", "")
         
         if not exe_path or not os.path.exists(exe_path):
             return False, "Blender path is not set. Go to Utilities tab."
 
-        # 2. پیدا کردن مسیر startup.py مخصوص بلندر
-        # مسیر: plugins/blender/startup.py
+        # 2. Find the startup.py path for Blender
+        # Path: plugins/blender/startup.py
         current_file_path = os.path.abspath(__file__)
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_path)))
         script_path = os.path.join(root_dir, "plugins", "blender", "startup.py")
         
-        # 3. دستور اجرا
-        # بلندر برخلاف مکس، اسکریپت را با فلگ --python اجرا می‌کند
+        # 3. Execution order
+        # Unlike Max, Blender runs the script with the --python flag
         cmd = [exe_path]
         
         if os.path.exists(script_path):
             print(f"Loading Blender Startup: {script_path}")
-            # دستور: blender.exe --python path/to/startup.py
+            # Constitution: blender.exe --python path/to/startup.py
             cmd.extend(["--python", script_path])
         else:
             print(f"Warning: Blender startup script not found at {script_path}")
 
         try:
-            # اجرای بلندر با متغیرهای محیطی کورتکس
+            # Running Blender with Cortex environment variables
             subprocess.Popen(cmd, env=self.env)
             return True, "Blender Launched Successfully!"
         except Exception as e:
@@ -326,7 +326,7 @@ class PhotoshopLauncher(BaseLauncher):
         self.software_dir = "photoshop"
 
     def launch(self):
-        # بررسی دسترسی دپارتمان
+        # Department access review
         if self.allowed_sw.lower() != "all" and "photoshop" not in self.allowed_sw.lower():
             return False, f"❌ Access Denied! Task locked to: {self.allowed_sw.upper()}"
 
@@ -336,12 +336,12 @@ class PhotoshopLauncher(BaseLauncher):
         if not exe_path or not os.path.exists(exe_path):
             return False, "Photoshop path is not set in Settings > Utilities."
         
-        # ۱. باز کردن خود فتوشاپ
+        # 1. Open Photoshop itself
         try:
             subprocess.Popen([exe_path], env=self.env)
             
-            # ۲. پیدا کردن و اجرای استارتاپ کورتکس به صورت مستقل
-            # حالا self.root_dir به درستی کار می‌کند
+            # 2. Finding and running a Cortex startup independently
+            # Now self.root_dir works properly
             startup_path = os.path.join(self.root_dir, "plugins", "photoshop", "startup.py")
             
             if os.path.exists(startup_path):
