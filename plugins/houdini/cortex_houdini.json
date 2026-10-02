@@ -1,0 +1,7 @@
+{
+    "env": [
+        {"CORTEX_HOUDINI": "$HOUDINI_PACKAGE_DIR"},
+        {"HOUDINI_PATH": "$CORTEX_HOUDINI;&"},
+        {"PYTHONPATH": "$CORTEX_HOUDINI/scripts;&"}
+    ]
+}

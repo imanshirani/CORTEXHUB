@@ -1,0 +1,15 @@
+import hda_creator
+import importlib
+importlib.reload(hda_creator)
+import hou
+
+# اجرای تابع ساخت نود هوشمند
+hda_creator.create_cortex_node()
+
+try:
+    obj = hou.node("/obj")
+    cortex_node = obj.createNode("geometry", "CORTEX_OUT")
+    cortex_node.setColor(hou.Color((0, 0.47, 0.8))) # رنگ آبی کورتکس
+    print(">> [Cortex] Publisher Node Created.")
+except:
+    pass

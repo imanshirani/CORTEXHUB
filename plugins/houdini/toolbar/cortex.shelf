@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <toolshelf name="cortex_shelf_tab" label="Cortex Pipeline">
+    <memberTool name="cortex_open_latest"/>
+    <memberTool name="cortex_save"/>
+    <memberTool name="cortex_publish"/>
+    <memberTool name="cortex_lookdev"/>
+    <memberTool name="cortex_loader"/>
+  </toolshelf>
+
+  <tool name="cortex_save" label="Save +" icon="BUTTONS_save">
+    <script scriptType="python"><![CDATA[
+import save_view
+import importlib
+importlib.reload(save_view)
+save_view.run()
+]]></script>
+  </tool>
+
+  <tool name="cortex_loader" label="Loader" icon="BUTTONS_list">
+    <script scriptType="python"><![CDATA[
+import loader
+import importlib
+importlib.reload(loader)
+loader.run()
+]]></script>
+  </tool>
+
+  <tool name="cortex_open_latest" label="Open Latest" icon="BUTTONS_revert">
+    <script scriptType="python"><![CDATA[
+import open_latest
+import importlib
+importlib.reload(open_latest)
+open_latest.run()
+]]></script>
+  </tool>
+
+  <tool name="cortex_lookdev" label="Lookdev Pub" icon="ROP_mantra">
+    <script scriptType="python"><![CDATA[
+import publisher_mat_houdini
+import importlib
+importlib.reload(publisher_mat_houdini)
+publisher_mat_houdini.run_lookdev_publish()
+]]></script>
+  </tool>
+
+  <tool name="cortex_publish" label="Publish" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import publisher_houdini
+import importlib
+importlib.reload(publisher_houdini)
+publisher_houdini.run()
+]]></script>
+  </tool>
+
+  <tool name="cortex_loader" label="Loader" icon="BUTTONS_list">
+    <script scriptType="python"><![CDATA[
+import loader
+import importlib
+importlib.reload(loader)
+loader.run()
+]]></script>
+  </tool>
+</shelfDocument>

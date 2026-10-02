@@ -1,0 +1,13 @@
+# --- Cortex Pipeline Core Dependencies ---
+
+# GUI Framework
+PySide6>=6.0.0
+
+# Database & Logic (Standard Libs like sqlite3 don't need listing)
+
+
+# External Software APIs
+photoshop-python-api>=0.2.0
+
+# Image & Data Handling
+Pillow>=9.0.0

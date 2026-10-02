@@ -1,0 +1,8 @@
+Document
+$env:PYTHONPATH="."; python -m pdoc -o ./docs app plugins
+
+
+
+
+build:
+pyinstaller --clean --noconsole --name "Cortex_Hub" app/main.py

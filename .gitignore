@@ -1,0 +1,38 @@
+# Local / backup snapshots
+BACK-UP/
+.qodo/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+
+# Studio databases (created on first run)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Build / packaging
+dist/
+build/
+*.spec
+
+# Env / secrets
+.env
+.env.*
