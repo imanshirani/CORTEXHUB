@@ -41,8 +41,11 @@ Set each DCC executable path in **Settings > Utilities**. Empty paths are unused
 | `app/` | Hub UI (PySide6) and SQLite core |
 | `plugins/` | DCC plugins: 3ds Max, Maya, Blender, Houdini, Photoshop |
 | `resource/icons/` | App and software icons |
-| `docs/en/` | English API reference (pdoc) |
+| `docs/en/` | English hub API (pdoc) |
+| `docs/en/plugins/` | English plugin overview + per-DCC HTML |
 | `docs/fa/` | Persian user guide |
+| `docs/fa/plugins.md` | Persian plugin guide |
+| `tools/build_docs.py` | Regenerates `docs/en` HTML (stubs DCC imports) |
 
 A local SQLite file is created under `app/core/` on first launch. Postgres is reserved for a later server/cloud setup.
 
@@ -51,3 +54,5 @@ A local SQLite file is created under `app/core/` on first launch. Postgres is re
 Launch a task from the dashboard. The hub writes `CORTEX_*` environment variables and a work folder, then starts the DCC with the matching plugin.
 
 Supported launchers: 3ds Max, Maya, Blender, Houdini, Photoshop.
+
+Plugin map (files, env, launch flags): [docs/en/plugins/README.md](docs/en/plugins/README.md). Persian: [docs/fa/plugins.md](docs/fa/plugins.md). Rebuild HTML with `python tools/build_docs.py`.

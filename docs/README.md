@@ -1,10 +1,12 @@
-# مستندات کورتکس هاب
+# Cortex Hub documentation
 
-دو نسخه:
+Two languages. Plugin HTML is generated; do not flatten this tree into `docs/` root.
 
-| زبان | مسیر | محتوا |
+| Language | Path | Contents |
 | --- | --- | --- |
-| English | [en/](en/index.html) | API مرجع (pdoc) |
-| فارسی | [fa/](fa/README.md) | راهنمای نصب و کار با استودیو |
+| English | [en/app.html](en/app.html) | Hub API (`app`, pdoc) |
+| English | [en/plugins/README.md](en/plugins/README.md) | Plugin overview + per-DCC HTML |
+| فارسی | [fa/README.md](fa/README.md) | راهنمای نصب و کار |
+| فارسی | [fa/plugins.md](fa/plugins.md) | راهنمای افزونه‌ها |
 
-کامنت‌های داخل کد انگلیسی است. راهنمای کاربر به هر دو زبان در همین پوشه است.
+Source comments stay English. Regenerate API HTML with `python tools/build_docs.py` (same Python that has PySide6).
