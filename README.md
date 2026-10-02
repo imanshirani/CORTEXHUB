@@ -24,8 +24,8 @@ python app/main.py
 
 First-run default admin (change it in Settings after login):
 
-- user: `iman`
-- password: `1234`
+- user: `admin`
+- password: `123456`
 
 Set each DCC executable path in **Settings > Utilities**. Empty paths are unused tools — fill only what your studio uses.
 

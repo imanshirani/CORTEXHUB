@@ -365,7 +365,7 @@ class DatabaseManager:
         if self.cursor.fetchone()[0] == 0:
             # دیتابیس خالی است، پس یوزر اولیه را بساز
             self.cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)",
-                                ("u1", "iman", "1234", "Iman Shirani", "admin", None))
+                                ("u1", "admin", "123456", "Admin", "admin", None))
 
             self.cursor.execute("INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?, ?)",
                                 ("p1", "Project Titan", "TTN", r"D:\Projects\Titan", "Active", "Octane", "3ds Max"))
