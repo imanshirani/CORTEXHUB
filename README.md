@@ -7,11 +7,16 @@ Repository: https://github.com/imanshirani/CORTEXHUB
 ## Requirements
 
 - Windows
-- Python 3.10+
-- pip packages in `requirements.txt`
+- Python 3.10+ on PATH (enable "Add python.exe to PATH" when installing)
+
+## Setup
+
+Double-click `Install_Cortex.bat` once. It checks Python and installs packages from `requirements.txt`.
+
+Or:
 
 ```
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Run
